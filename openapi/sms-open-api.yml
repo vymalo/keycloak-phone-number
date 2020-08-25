@@ -1,0 +1,72 @@
+openapi: 3.0.1
+info:
+  title: Auth OpenApi
+  description: 'BayamSell
+    at [https://bayamsell.com](https://pay.bayamsell.com)'
+  termsOfService: https://bayamsell.com/resources/terms-of-use
+  contact:
+    email: hello@bayamsell.com
+  license:
+    name: MIT
+  version: 1.0.0
+externalDocs:
+  description: Find out more about ByS Pay
+  url: https://bayamsell.com
+servers:
+  - url: http://localhost:8080
+    description: Dev server
+  - url: http://backend:8080
+    description: Production server
+tags:
+  - name: sms
+    description: All about sending an SMS
+paths:
+  /{url}:
+    post:
+      tags:
+        - sms
+      summary: Send sms
+      description: Send an SMS to the phone number provided
+      operationId: sendSms
+      parameters:
+        - name: url
+          in: path
+          description: Url of the sms api in the external server
+          required: true
+          schema:
+            type: string
+      security:
+        - basic_auth: []
+      requestBody:
+        description: Send sms request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendSmsRequest'
+        required: true
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendSmsResponse"
+        default:
+          description: successful operation
+          content: {}
+
+components:
+  schemas:
+    SendSmsRequest:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+        smsCode:
+          type: number
+    SendSmsResponse:
+      type: object
+  securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
