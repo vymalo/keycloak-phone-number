@@ -1,0 +1,7 @@
+*
+!openapi
+!src
+!pom.xml
+!templates
+!README.md
+!.gitignore

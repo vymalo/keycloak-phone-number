@@ -1,6 +1,0 @@
-com.bayamsell.keycloak.authenticator.PhoneNumberGetNumber
-com.bayamsell.keycloak.authenticator.PhoneNumberConfirmNumber
-com.bayamsell.keycloak.authenticator.PhoneNumberChooseUser
-com.bayamsell.keycloak.authenticator.PhoneNumberSendTan
-com.bayamsell.keycloak.authenticator.PhoneNumberValidateTan
-com.bayamsell.keycloak.authenticator.PhoneNumberUpdateUser
