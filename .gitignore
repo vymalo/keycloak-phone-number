@@ -1,7 +1,6 @@
-*
-!openapi
-!src
-!pom.xml
-!templates
-!README.md
-!.gitignore
+.idea
+*.iml
+*.log
+*.class
+target
+.code
