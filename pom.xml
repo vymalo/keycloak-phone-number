@@ -10,7 +10,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <maxmind.version>2.13.1</maxmind.version>
+        <maxmind.version>2.15.0</maxmind.version>
         <lombock.version>1.18.10</lombock.version>
         <keycloak.version>11.0.1</keycloak.version>
         <googlecode.libphonenumber.version>8.10.2</googlecode.libphonenumber.version>
