@@ -19,7 +19,7 @@
         <openapi-generator.version>4.3.1</openapi-generator.version>
         <bys-next-client.api>com.bayamsell.api.server</bys-next-client.api>
         <resteasy-version>3.13.1.Final</resteasy-version>
-        <jackson-version>2.10.3</jackson-version>
+        <jackson-version>2.12.0</jackson-version>
         <jackson-databind-version>2.10.3</jackson-databind-version>
         <jackson-databind-nullable-version>0.2.1</jackson-databind-nullable-version>
         <threetenbp-version>2.11.2</threetenbp-version>
