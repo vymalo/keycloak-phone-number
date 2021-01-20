@@ -11,7 +11,7 @@
     <properties>
         <java.version>11</java.version>
         <maxmind.version>2.15.0</maxmind.version>
-        <lombock.version>1.18.10</lombock.version>
+        <lombock.version>1.18.16</lombock.version>
         <keycloak.version>11.0.1</keycloak.version>
         <googlecode.libphonenumber.version>8.12.8</googlecode.libphonenumber.version>
         <googlecode.geocoder.version>2.108</googlecode.geocoder.version>
@@ -23,7 +23,7 @@
         <jackson-databind-version>2.12.0</jackson-databind-version>
         <jackson-databind-nullable-version>0.2.1</jackson-databind-nullable-version>
         <threetenbp-version>2.11.2</threetenbp-version>
-        <jodatime-cversion>2.9.9</jodatime-version>
+        <jodatime-cversion/>2.9.9
         <maven-plugin-version>1.0.0</maven-plugin-version>
         <junit-version>4.13</junit-version>
     </properties>
