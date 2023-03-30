@@ -4,28 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.bayamsell.keycloak</groupId>
+    <groupId>com.vymalo.keycloak</groupId>
     <artifactId>keycloak-phonenumber-login</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
-        <java.version>11</java.version>
-        <maxmind.version>2.15.0</maxmind.version>
-        <lombock.version>1.18.10</lombock.version>
-        <keycloak.version>11.0.1</keycloak.version>
-        <googlecode.libphonenumber.version>8.12.8</googlecode.libphonenumber.version>
-        <googlecode.geocoder.version>2.151</googlecode.geocoder.version>
-        <swagger-annotations-version>1.5.22</swagger-annotations-version>
+        <java.version>17</java.version>
+        <lombock.version>1.18.26</lombock.version>
+        <keycloak.version>21.0.1</keycloak.version>
+        <googlecode.libphonenumber.version>8.13.7</googlecode.libphonenumber.version>
+        <googlecode.geocoder.version>2.201</googlecode.geocoder.version>
+        <swagger-annotations-version>1.6.8</swagger-annotations-version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
-        <bys-next-client.api>com.bayamsell.api.server</bys-next-client.api>
-        <resteasy-version>4.5.8.SP1</resteasy-version>
-        <jackson-version>2.12.0</jackson-version>
-        <jackson-databind-version>2.12.0</jackson-databind-version>
-        <jackson-databind-nullable-version>0.2.1</jackson-databind-nullable-version>
-        <threetenbp-version>2.11.2</threetenbp-version>
-        <jodatime-cversion>2.9.9</jodatime-version>
-        <maven-plugin-version>1.0.0</maven-plugin-version>
-        <junit-version>4.13</junit-version>
+        <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
+        <jackson-version>2.14.2</jackson-version>
+        <jackson-databind-version>2.14.2</jackson-databind-version>
+        <jackson-databind-nullable-version>0.2.6</jackson-databind-nullable-version>
+        <threetenbp-version>2.12.2</threetenbp-version>
+        <junit-version>4.13.2</junit-version>
     </properties>
 
     <dependencyManagement>
@@ -41,6 +37,12 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+
         <!-- ::Start Keycloak:: -->
         <dependency>
             <groupId>org.keycloak</groupId>
@@ -68,13 +70,6 @@
             <version>${googlecode.geocoder.version}</version>
         </dependency>
 
-        <!-- Maxmind -->
-        <dependency>
-            <groupId>com.maxmind.geoip2</groupId>
-            <artifactId>geoip2</artifactId>
-            <version>${maxmind.version}</version>
-        </dependency>
-
         <!-- Lombock -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -100,17 +95,6 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
-        <!-- HTTP client: jersey-client -->
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-client</artifactId>
-            <version>${resteasy-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-multipart-provider</artifactId>
-            <version>${resteasy-version}</version>
-        </dependency>
         <!-- JSON processing: jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -132,38 +116,11 @@
             <artifactId>jackson-databind-nullable</artifactId>
             <version>${jackson-databind-nullable-version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
-            <version>${jackson-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${jodatime-version}</version>
-        </dependency>
 
-        <!-- Base64 encoding that works in both JVM and Android -->
-        <dependency>
-            <groupId>com.brsanthu</groupId>
-            <artifactId>migbase64</artifactId>
-            <version>2.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson2-provider</artifactId>
-            <version>3.13.0.Final</version>
-        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.joschi.jackson</groupId>
-            <artifactId>jackson-datatype-threetenbp</artifactId>
-            <version>${threetenbp-version}</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>
@@ -201,39 +158,35 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-ear-plugin</artifactId>
-                <version>3.0.1</version>
+                <artifactId>maven-shade-plugin</artifactId>
                 <configuration>
-                    <defaultLibBundleDir>lib</defaultLibBundleDir>
-                    <outputFileNameMapping>@{artifactId}@.@{extension}@</outputFileNameMapping>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.wildfly.plugins</groupId>
-                <artifactId>wildfly-maven-plugin</artifactId>
-                <version>2.0.1.Final</version>
-            </plugin>
-
-            <!-- Maven Assembly Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <!-- get all project dependencies -->
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <!-- bind to the packaging phase -->
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.apache.commons:*</include>
+                                    <include>com.googlecode.libphonenumber:*</include>
+                                    <include>org.openapitools:*</include>
+                                </includes>
+                            </artifactSet>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -249,15 +202,13 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <language>java</language>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
+                            <generatorName>java</generatorName>
 
                             <configOptions>
                                 <serializationLibrary>jackson</serializationLibrary>
                                 <serializableModel>true</serializableModel>
                                 <dateLibrary>legacy</dateLibrary>
-                                <library>resteasy</library>
+                                <library>native</library>
                             </configOptions>
                             <httpUserAgent>Keycloak/Java</httpUserAgent>
                         </configuration>
@@ -266,10 +217,10 @@
 
                 <configuration>
                     <inputSpec>${project.basedir}/openapi/sms-open-api.yml</inputSpec>
-                    <output>${project.build.directory}/generated-sources/bys-sms</output>
-                    <apiPackage>${bys-next-client.api}.handler</apiPackage>
-                    <modelPackage>${bys-next-client.api}.model</modelPackage>
-                    <invokerPackage>${bys-next-client.api}.handler</invokerPackage>
+                    <output>${project.build.directory}/generated-sources/vym-sms</output>
+                    <apiPackage>${vym-next-client.api}.handler</apiPackage>
+                    <modelPackage>${vym-next-client.api}.model</modelPackage>
+                    <invokerPackage>${vym-next-client.api}.handler</invokerPackage>
                 </configuration>
             </plugin>
 

@@ -1,0 +1,54 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.7.0
+        with:
+          java-version: 11
+          maven-version: 3.9.0
+      - name: Build jar
+        run: mvn package
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: target-keycloak-phonenumber-login
+          path: target/keycloak-phonenumber-login-*.jar
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: target-keycloak-phonenumber-login
+
+      # Upload as an artifact of the current workflow
+      - name: Upload build zip artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Release artifacts
+          path: '*.jar'
+
+      # Make official GitHub release which will trigger
+      # sending the mail with link for access
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: '*.jar'
+          draft: false
+          prerelease: false
+          allowUpdates: true
+          bodyFile: CHANGELOG.md
+          tag: v1.0.0

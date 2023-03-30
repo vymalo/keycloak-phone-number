@@ -1,40 +1,34 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
-  title: Auth OpenApi
-  description: 'BayamSell
-    at [https://bayamsell.com](https://pay.bayamsell.com)'
-  termsOfService: https://bayamsell.com/resources/terms-of-use
+  title: SMS OpenApi
+  description: |
+    Some existing API Server for sending POST message to help 
+    with authentication at [https://bayamsell.com](https://pay.bayamsell.com)
+  termsOfService: https://blog.ssegning.com
   contact:
-    email: hello@bayamsell.com
+    email: dev@ssegning.com
   license:
     name: MIT
   version: 1.0.0
 externalDocs:
-  description: Find out more about ByS Pay
-  url: https://bayamsell.com
+  description: Find out more about calling setting up an external service to verify phone number
+  url: https://blog.ssegning.com
 servers:
   - url: http://localhost:8080
     description: Dev server
-  - url: http://backend:8080
+  - url: https://sms-api-server:port
     description: Production server
 tags:
   - name: sms
     description: All about sending an SMS
 paths:
-  /{url}:
+  /send-sms:
     post:
       tags:
         - sms
       summary: Send sms
       description: Send an SMS to the phone number provided
       operationId: sendSms
-      parameters:
-        - name: url
-          in: path
-          description: Url of the sms api in the external server
-          required: true
-          schema:
-            type: string
       security:
         - basic_auth: []
       requestBody:
@@ -64,8 +58,23 @@ components:
           type: string
         smsCode:
           type: number
+      required:
+        - phoneNumber
+        - smsCode
+    SmsStatus:
+      type: string
+      enum:
+        - SENT
+        - ERROR
+        - PENDING
     SendSmsResponse:
       type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/SmsStatus'
+        description:
+          type: string
+          maxLength: 200
   securitySchemes:
     basic_auth:
       type: http
