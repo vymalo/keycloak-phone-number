@@ -14,7 +14,7 @@
         <keycloak.version>21.0.1</keycloak.version>
         <googlecode.libphonenumber.version>8.13.7</googlecode.libphonenumber.version>
         <googlecode.geocoder.version>2.201</googlecode.geocoder.version>
-        <swagger-annotations-version>1.6.8</swagger-annotations-version>
+        <swagger-annotations-version>1.6.9</swagger-annotations-version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
         <jackson-version>2.14.2</jackson-version>
