@@ -12,7 +12,7 @@
         <java.version>17</java.version>
         <lombock.version>1.18.26</lombock.version>
         <keycloak.version>21.0.1</keycloak.version>
-        <googlecode.libphonenumber.version>8.13.7</googlecode.libphonenumber.version>
+        <googlecode.libphonenumber.version>8.13.8</googlecode.libphonenumber.version>
         <googlecode.geocoder.version>2.201</googlecode.geocoder.version>
         <swagger-annotations-version>1.6.8</swagger-annotations-version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
