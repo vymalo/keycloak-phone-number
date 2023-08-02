@@ -15,8 +15,8 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 
 @JBossLog
@@ -30,11 +30,11 @@ public class PhoneNumberValidateTan implements
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "1.0.0");
+        infos.put("version", "1.1.0");
     }
 
     @Override

@@ -6,12 +6,12 @@
 
     <groupId>com.vymalo.keycloak</groupId>
     <artifactId>keycloak-phonenumber-login</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 
     <properties>
         <java.version>17</java.version>
         <lombock.version>1.18.26</lombock.version>
-        <keycloak.version>21.0.1</keycloak.version>
+        <keycloak.version>22.0.1</keycloak.version>
         <googlecode.libphonenumber.version>8.13.8</googlecode.libphonenumber.version>
         <googlecode.geocoder.version>2.202</googlecode.geocoder.version>
         <swagger-annotations-version>1.6.9</swagger-annotations-version>
