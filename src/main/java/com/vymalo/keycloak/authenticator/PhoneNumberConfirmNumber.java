@@ -2,6 +2,8 @@ package com.vymalo.keycloak.authenticator;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.vymalo.keycloak.constants.PhoneKey;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.Config;
@@ -13,8 +15,6 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,7 @@ public class PhoneNumberConfirmNumber implements
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "1.0.0");
+        infos.put("version", "1.1.0");
     }
 
     @Override
