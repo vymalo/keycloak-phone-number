@@ -37,7 +37,7 @@ public class PhoneNumberSendTan implements
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
     private static final Logger LOG = Logger.getLogger(PhoneNumberSendTan.class);
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
     private static final Map<String, String> infos = new HashMap<>();
 
     static {

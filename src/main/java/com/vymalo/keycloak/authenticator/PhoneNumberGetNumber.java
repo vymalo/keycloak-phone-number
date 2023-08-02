@@ -43,7 +43,7 @@ public class PhoneNumberGetNumber implements
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
@@ -63,7 +63,7 @@ public class PhoneNumberGetNumber implements
     private static boolean handlePreExistingUser(AuthenticationFlowContext context, UserModel existingUser) {
         String attrName = Utils.getConfigString(context.getAuthenticatorConfig(), ConfigKey.USER_PHONE_ATTRIBUTE_NAME, PhoneNumberHelper.DEFAULT_PHONE_KEY_NAME);
         final var phoneNumbers = existingUser.getAttributeStream(attrName).toList();
-        if (phoneNumbers.size() >= 1) {
+        if (!phoneNumbers.isEmpty()) {
             String phoneNumber = phoneNumbers.get(0);
 
             log.debugf("Forget-password triggered when re-authenticating user after first broker login. Pre-filling request-user-phone-number screen with user's phone '%s' ", phoneNumber);
@@ -138,7 +138,6 @@ public class PhoneNumberGetNumber implements
         try {
             number = PhoneNumberHelper.phoneNumberUtil.parse(phoneNumber, null);
         } catch (NumberParseException e) {
-            e.printStackTrace();
             event.clone()
                     .detail("phone_number", phoneNumber)
                     .error("parse number error: " + e.getMessage());

@@ -36,7 +36,7 @@ public class PhoneNumberConfirmNumber implements
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
