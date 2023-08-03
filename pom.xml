@@ -12,13 +12,13 @@
         <java.version>17</java.version>
         <lombock.version>1.18.26</lombock.version>
         <keycloak.version>22.0.1</keycloak.version>
-        <googlecode.libphonenumber.version>8.13.8</googlecode.libphonenumber.version>
-        <googlecode.geocoder.version>2.202</googlecode.geocoder.version>
+        <googlecode.libphonenumber.version>8.13.16</googlecode.libphonenumber.version>
+        <googlecode.geocoder.version>2.210</googlecode.geocoder.version>
         <swagger-annotations-version>1.6.9</swagger-annotations-version>
         <openapi-generator.version>4.3.1</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
         <jackson-version>2.15.2</jackson-version>
-        <jackson-databind-version>2.15.0</jackson-databind-version>
+        <jackson-databind-version>2.15.2</jackson-databind-version>
         <jackson-databind-nullable-version>0.2.6</jackson-databind-nullable-version>
         <threetenbp-version>2.12.2</threetenbp-version>
         <junit-version>4.13.2</junit-version>
