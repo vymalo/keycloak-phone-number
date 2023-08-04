@@ -10,7 +10,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <lombock.version>1.18.26</lombock.version>
+        <lombock.version>1.18.28</lombock.version>
         <keycloak.version>22.0.1</keycloak.version>
         <googlecode.libphonenumber.version>8.13.16</googlecode.libphonenumber.version>
         <googlecode.geocoder.version>2.210</googlecode.geocoder.version>
