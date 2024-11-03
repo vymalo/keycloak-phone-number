@@ -9,10 +9,10 @@ info:
     email: dev@ssegning.com
   license:
     name: MIT
-  version: 1.1.0
+  version: 26.0.0
 externalDocs:
   description: Find out more about calling setting up an external service to verify phone number
-  url: https://blog.ssegning.com
+  url: https://ssegning.com
 servers:
   - url: http://localhost:8080
     description: Dev server

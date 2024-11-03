@@ -6,22 +6,17 @@
 
     <groupId>com.vymalo.keycloak</groupId>
     <artifactId>keycloak-phonenumber-login</artifactId>
-    <version>1.1.0</version>
+    <version>26.0.0</version>
 
     <properties>
         <java.version>17</java.version>
-        <lombock.version>1.18.30</lombock.version>
-        <keycloak.version>22.0.1</keycloak.version>
-        <googlecode.geocoder.version>2.213</googlecode.geocoder.version>
-        <googlecode.libphonenumber.version>8.13.19</googlecode.libphonenumber.version>
-        <swagger-annotations-version>1.6.11</swagger-annotations-version>
-        <openapi-generator.version>4.3.1</openapi-generator.version>
+        <lombock.version>1.18.34</lombock.version>
+        <keycloak.version>26.0.5</keycloak.version>
+        <googlecode.geocoder.version>2.243</googlecode.geocoder.version>
+        <googlecode.libphonenumber.version>8.13.49</googlecode.libphonenumber.version>
+        <openapi-generator.version>7.9.0</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
-        <jackson-version>2.15.3</jackson-version>
-        <jackson-databind-version>2.15.3</jackson-databind-version>
-        <jackson-databind-nullable-version>0.2.6</jackson-databind-nullable-version>
         <threetenbp-version>2.12.2</threetenbp-version>
-        <junit-version>4.13.2</junit-version>
     </properties>
 
     <dependencyManagement>
@@ -83,9 +78,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.swagger</groupId>
+            <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>${swagger-annotations-version}</version>
+            <version>2.2.25</version>
         </dependency>
 
         <dependency>
@@ -96,41 +91,42 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson-version}</version>
+            <version>2.18.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson-version}</version>
+            <version>2.18.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind-version}</version>
+            <version>2.18.1</version>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
-            <version>${jackson-databind-nullable-version}</version>
+            <version>0.2.6</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson-version}</version>
+            <version>2.18.1</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit-version}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.11.3</version>
             <scope>test</scope>
         </dependency>
+
 
         <!-- End: OpenApi -->
     </dependencies>
 
     <build>
-        <finalName>${artifactId}-${project.version}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
 
         <plugins>
             <plugin>
@@ -155,6 +151,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>

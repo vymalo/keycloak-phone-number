@@ -34,7 +34,7 @@ public class PhoneNumberValidateTan implements
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "1.1.0");
+        infos.put("version", "26.0.0");
     }
 
     @Override
