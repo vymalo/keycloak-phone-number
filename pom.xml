@@ -16,7 +16,6 @@
         <googlecode.libphonenumber.version>8.13.49</googlecode.libphonenumber.version>
         <openapi-generator.version>7.10.0</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
-        <threetenbp-version>2.12.2</threetenbp-version>
     </properties>
 
     <dependencyManagement>
@@ -35,7 +34,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.13.0</version>
+            <version>3.14.0</version>
         </dependency>
 
         <!-- ::Start Keycloak:: -->
