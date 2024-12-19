@@ -33,7 +33,7 @@ public class PhoneNumberChooseUser implements
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "26.0.0");
+        infos.put("version", "26.0.7");
 
         final var property = new ProviderConfigProperty();
         property.setName(ConfigKey.USER_PHONE_ATTRIBUTE_NAME);
@@ -74,7 +74,7 @@ public class PhoneNumberChooseUser implements
                     .searchForUserByUserAttributeStream(realm, attrName, phoneNumber)
                     .toList();
 
-            if (users.size() == 0 && user == null) {
+            if (users.isEmpty() && user == null) {
                 final var newUser = userProvider.addUser(realm, phoneNumber);
                 newUser.setAttribute(attrName, Collections.singletonList(phoneNumber));
                 newUser.setEnabled(true);

@@ -1,5 +1,6 @@
 package com.vymalo.keycloak.authenticator;
 
+import com.vymalo.api.server.handler.ApiClient;
 import com.vymalo.api.server.handler.Configuration;
 import com.vymalo.api.server.handler.SmsApi;
 import com.vymalo.api.server.model.SendSmsRequest;
@@ -41,7 +42,7 @@ public class PhoneNumberSendTan implements
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "26.0.0");
+        infos.put("version", "26.0.7");
 
         ProviderConfigProperty property;
 
@@ -81,7 +82,8 @@ public class PhoneNumberSendTan implements
         final var basicUsr = Utils.getConfigString(config, ConfigKey.BASIC_AUTH_USERNAME);
         final var basicPwd = Utils.getConfigString(config, ConfigKey.BASIC_AUTH_PASSWORD);
 
-        final var apiClient = Configuration.getDefaultApiClient();
+        final var apiClient = new ApiClient();
+        apiClient.updateBaseUri(smsUrl);
         apiClient.setRequestInterceptor(builder -> {
             if (StringUtils.isNotEmpty(basicUsr) && StringUtils.isNotEmpty(basicPwd)) {
                 String valueToEncode = basicUsr + ":" + basicPwd;
@@ -90,20 +92,12 @@ public class PhoneNumberSendTan implements
             }
         });
 
-        final var smsApi = new SmsApi();
         final var request = new SendSmsRequest();
         request.setPhoneNumber(mobileNumber);
         request.setSmsCode(new BigDecimal(code));
 
         try {
-            final var uri = new URI(smsUrl);
-            final var path = uri.getPath();
-            final var baseUrl = smsUrl.split(path)[0];
-
-            apiClient.setBasePath(baseUrl);
-            apiClient.setHost(uri.getHost());
-            apiClient.setPort(uri.getPort());
-            apiClient.setScheme(uri.getScheme());
+            final var smsApi = new SmsApi(apiClient);
             smsApi.sendSms(request);
 
             event.clone()

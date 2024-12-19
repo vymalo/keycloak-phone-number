@@ -1,12 +1,23 @@
 <#import "template.ftl" as layout>
-<@layout.registrationLayout displayMessage=true; section>
-    <#if section = "header">
-        Please enter the Code
+<@layout.registrationLayout; section>
+    <#if section = "header" || section = "show-username">
+        <h1 id="kc-page-title">
+            Please enter the Code
+        </h1>
+        <style>#kc-username {display: none;}</style>
     <#elseif section = "form">
         <form id="kc-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
             <div id="kc-info-message">
+                <p>We sent a code at</p>
+                <p><b>${phoneNumber}</b></p>
+            </div>
+
+            <div class="${properties.kcFormGroupClass!}">
+                <label for="smsCode"
+                       class="${properties.kcLabelClass!}">
+                    ${msg("Country")}
+                </label>
                 <input type="number"
-                       required
                        id="smsCode"
                        name="code"
                        class="${properties.kcInputClass!}"
@@ -22,7 +33,6 @@
                     <input class="${properties.kcButtonClass!} ${properties.kcButtonDefaultClass!} ${properties.kcButtonLargeClass!}"
                            name="cancel" id="kc-decline" type="submit" value="${msg("doDecline")}"/>
                 </div>
-
             </div>
         </form>
     </#if>

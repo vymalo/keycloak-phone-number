@@ -34,7 +34,7 @@ public class PhoneNumberValidateTan implements
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "26.0.0");
+        infos.put("version", "26.0.7");
     }
 
     @Override
@@ -52,6 +52,7 @@ public class PhoneNumberValidateTan implements
         }
 
         Response challenge = context.form()
+                .setAttribute("phoneNumber", phoneNumber)
                 .createForm("request-user-tan-code.ftl");
         context.challenge(challenge);
     }
@@ -61,6 +62,7 @@ public class PhoneNumberValidateTan implements
         UserModel user = context.getUser();
         AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
         String attemptedCode = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_CODE_NAME);
+        String phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
 
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String cancel = formData.getFirst("cancel");
@@ -83,6 +85,7 @@ public class PhoneNumberValidateTan implements
 
             Response challenge = context
                     .form()
+                    .setAttribute("phoneNumber", phoneNumber)
                     .setAttribute("smsCode", code)
                     .setError(Errors.INVALID_CODE)
                     .createForm("request-user-tan-code.ftl");

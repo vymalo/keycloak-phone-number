@@ -1,5 +1,10 @@
 # Login By PhoneNumber
 
-This plugin helps you login using phon number tan. For that, we create and manage a user attribute `phoneNumber`.
+This plugin helps you to login by phone number. 
 
-After you install it, you can configure each step independently
+![Example](./docs/screenshot.png)
+
+## Usage
+To use it, download it into the `providers` directory of your Keycloak server and restart the server.
+
+An example is shown in the [compose.yml](./compose.yml) file.
