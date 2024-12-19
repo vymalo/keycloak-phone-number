@@ -13,7 +13,7 @@
         <lombock.version>1.18.34</lombock.version>
         <keycloak.version>26.0.7</keycloak.version>
         <googlecode.geocoder.version>2.243</googlecode.geocoder.version>
-        <googlecode.libphonenumber.version>8.13.49</googlecode.libphonenumber.version>
+        <googlecode.libphonenumber.version>8.13.52</googlecode.libphonenumber.version>
         <openapi-generator.version>7.10.0</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
     </properties>
