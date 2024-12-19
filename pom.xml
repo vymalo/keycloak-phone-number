@@ -13,7 +13,7 @@
         <lombock.version>1.18.34</lombock.version>
         <keycloak.version>26.0.7</keycloak.version>
         <googlecode.geocoder.version>2.246</googlecode.geocoder.version>
-        <googlecode.libphonenumber.version>8.13.49</googlecode.libphonenumber.version>
+        <googlecode.libphonenumber.version>8.13.52</googlecode.libphonenumber.version>
         <openapi-generator.version>7.10.0</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
     </properties>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.18.1</version>
+            <version>2.18.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.18.1</version>
+            <version>2.18.2</version>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -111,7 +111,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.18.1</version>
+            <version>2.18.2</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
