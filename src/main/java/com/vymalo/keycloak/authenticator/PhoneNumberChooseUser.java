@@ -6,23 +6,18 @@ import com.vymalo.keycloak.constants.PhoneNumberHelper;
 import com.vymalo.keycloak.constants.Utils;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.events.Errors;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @JBossLog
 @NoArgsConstructor
-public class PhoneNumberChooseUser implements
-        Authenticator,
-        AuthenticatorFactory,
-        ServerInfoAwareProviderFactory {
+public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
 
     public static final String PROVIDER_ID = "phone-number-choose-user";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
@@ -30,11 +25,8 @@ public class PhoneNumberChooseUser implements
     };
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-    private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "26.0.7");
-
         final var property = new ProviderConfigProperty();
         property.setName(ConfigKey.USER_PHONE_ATTRIBUTE_NAME);
         property.setLabel("Phone attribute name");
@@ -93,22 +85,8 @@ public class PhoneNumberChooseUser implements
     }
 
     @Override
-    public void action(AuthenticationFlowContext context) {
-    }
-
-    @Override
-    public boolean requiresUser() {
-        return false;
-    }
-
-    @Override
     public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
         return PhoneNumberHelper.handleConfiguredFor(user);
-    }
-
-    @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-
     }
 
     @Override
@@ -132,11 +110,6 @@ public class PhoneNumberChooseUser implements
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
-
-    @Override
     public String getHelpText() {
         return "Choose a user, by his/her phone number, to reset credentials for";
     }
@@ -147,30 +120,8 @@ public class PhoneNumberChooseUser implements
     }
 
     @Override
-    public Authenticator create(KeycloakSession session) {
-        return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
     public String getId() {
         return PROVIDER_ID;
-    }
-
-    @Override
-    public Map<String, String> getOperationalInfo() {
-        return infos;
     }
 
 }

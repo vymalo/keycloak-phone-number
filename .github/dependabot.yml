@@ -6,3 +6,9 @@ updates:
       interval: "daily"
     allow:
       - dependency-type: production
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-type: production

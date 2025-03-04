@@ -6,19 +6,16 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.provider.ServerInfoAwareProviderFactory;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import static com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
@@ -27,21 +24,13 @@ import static com.vymalo.keycloak.constants.PhoneNumberHelper.phoneNumberUtil;
 
 @JBossLog
 @NoArgsConstructor
-public class PhoneNumberConfirmNumber implements
-        Authenticator,
-        AuthenticatorFactory,
-        ServerInfoAwareProviderFactory {
+public class PhoneNumberConfirmNumber extends AbstractPhoneNumberAuthenticator {
 
     public static final String PROVIDER_ID = "phone-number-confirm-number";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-    private static final Map<String, String> infos = new HashMap<>();
-
-    static {
-        infos.put("version", "26.0.7");
-    }
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -87,18 +76,8 @@ public class PhoneNumberConfirmNumber implements
     }
 
     @Override
-    public boolean requiresUser() {
-        return false;
-    }
-
-    @Override
     public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
         return handleConfiguredFor(user);
-    }
-
-    @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-
     }
 
     @Override
@@ -112,18 +91,8 @@ public class PhoneNumberConfirmNumber implements
     }
 
     @Override
-    public boolean isConfigurable() {
-        return false;
-    }
-
-    @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
-    }
-
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
     }
 
     @Override
@@ -137,33 +106,8 @@ public class PhoneNumberConfirmNumber implements
     }
 
     @Override
-    public Authenticator create(KeycloakSession session) {
-        return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    @Override
     public String getId() {
         return PROVIDER_ID;
-    }
-
-    @Override
-    public Map<String, String> getOperationalInfo() {
-        return infos;
     }
 
 }

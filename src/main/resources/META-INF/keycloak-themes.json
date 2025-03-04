@@ -2,9 +2,7 @@
   "themes": [
     {
       "name": "base",
-      "types": [
-        "login"
-      ]
+      "types": ["login"]
     }
   ]
 }

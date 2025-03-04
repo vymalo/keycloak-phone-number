@@ -2,25 +2,19 @@ package com.vymalo.keycloak.authenticator;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @JBossLog
 @NoArgsConstructor
-public class PhoneNumberUpdateUser implements
-        Authenticator,
-        AuthenticatorFactory,
-        ServerInfoAwareProviderFactory {
+public class PhoneNumberUpdateUser extends AbstractPhoneNumberAuthenticator {
 
     public static final String PROVIDER_ID = "phone-number-update-user";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
@@ -30,11 +24,6 @@ public class PhoneNumberUpdateUser implements
             AuthenticationExecutionModel.Requirement.DISABLED
     };
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-    private static final Map<String, String> infos = new HashMap<>();
-
-    static {
-        infos.put("version", "26.0.7");
-    }
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -73,11 +62,6 @@ public class PhoneNumberUpdateUser implements
     }
 
     @Override
-    public boolean isConfigurable() {
-        return false;
-    }
-
-    @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
     }
@@ -98,29 +82,7 @@ public class PhoneNumberUpdateUser implements
     }
 
     @Override
-    public Authenticator create(KeycloakSession session) {
-        return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
     public String getId() {
         return PROVIDER_ID;
-    }
-
-    @Override
-    public Map<String, String> getOperationalInfo() {
-        return infos;
     }
 }

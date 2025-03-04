@@ -9,7 +9,6 @@
   "loginWithEmailAllowed": true,
   "resetPasswordAllowed": true,
   "enabled": true,
-  "loginTheme": "ssegning-tw-01",
   "internationalizationEnabled": true,
   "supportedLocales": [
     "de",
@@ -55,7 +54,7 @@
   "users": [
     {
       "email": "${KEYCLOAK_ADMIN}@admin",
-      "username": "${KEYCLOAK_ADMIN}",
+      "username": "test",
       "firstName": "DevOps",
       "lastName": "SRE",
       "enabled": true,
@@ -64,7 +63,7 @@
         {
           "temporary": false,
           "type": "password",
-          "value": "${KEYCLOAK_ADMIN_PASSWORD}"
+          "value": "test"
         }
       ]
     }

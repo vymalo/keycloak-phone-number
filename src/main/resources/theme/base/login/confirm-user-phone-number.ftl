@@ -5,9 +5,9 @@
     <#elseif section = "form">
         <form id="kc-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
             <div id="kc-info-message">
-                <p>Is this number correct ?</p>
-                <p><b>${phoneNumber}</b></p>
-                <p>We'll send an sms to this number with a code for next steps</p>
+                <p class="confirm-field">Is this number correct ?</p>
+                <p class="phoneNumber-field"><b>${phoneNumber}</b></p>
+                <p class="instruction-field">We'll send an sms to this number with a code for next steps</p>
             </div>
 
             <div class="${properties.kcFormGroupClass!}">

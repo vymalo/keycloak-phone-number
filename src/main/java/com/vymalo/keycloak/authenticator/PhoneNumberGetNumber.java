@@ -12,31 +12,25 @@ import jakarta.ws.rs.core.Response;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.commons.lang3.StringUtils;
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
-import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.events.EventBuilder;
-import org.keycloak.models.*;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import static org.keycloak.models.DefaultActionTokenKey.ACTION_TOKEN_USER_ID;
 
 @JBossLog
 @NoArgsConstructor
-public class PhoneNumberGetNumber implements
-        Authenticator,
-        AuthenticatorFactory,
-        ServerInfoAwareProviderFactory {
+public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
 
     public static final String PROVIDER_ID = "get-user-phone-number";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
@@ -44,11 +38,8 @@ public class PhoneNumberGetNumber implements
     };
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-    private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "26.0.7");
-
         ProviderConfigProperty property;
 
         // Phone name
@@ -162,18 +153,8 @@ public class PhoneNumberGetNumber implements
     }
 
     @Override
-    public boolean requiresUser() {
-        return false;
-    }
-
-    @Override
     public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
         return PhoneNumberHelper.handleConfiguredFor(user);
-    }
-
-    @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-
     }
 
     @Override
@@ -197,11 +178,6 @@ public class PhoneNumberGetNumber implements
     }
 
     @Override
-    public boolean isUserSetupAllowed() {
-        return false;
-    }
-
-    @Override
     public String getHelpText() {
         return "Get a user by his phone number";
     }
@@ -212,30 +188,8 @@ public class PhoneNumberGetNumber implements
     }
 
     @Override
-    public Authenticator create(KeycloakSession session) {
-        return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
     public String getId() {
         return PROVIDER_ID;
-    }
-
-    @Override
-    public Map<String, String> getOperationalInfo() {
-        return infos;
     }
 
 }

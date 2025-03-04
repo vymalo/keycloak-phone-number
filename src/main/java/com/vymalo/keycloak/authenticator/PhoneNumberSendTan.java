@@ -1,7 +1,6 @@
 package com.vymalo.keycloak.authenticator;
 
 import com.vymalo.api.server.handler.ApiClient;
-import com.vymalo.api.server.handler.Configuration;
 import com.vymalo.api.server.handler.SmsApi;
 import com.vymalo.api.server.model.SendSmsRequest;
 import com.vymalo.keycloak.constants.ConfigKey;
@@ -12,26 +11,21 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
-import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
-import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
 import java.math.BigDecimal;
-import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Random;
 
 @JBossLog
 @NoArgsConstructor
-public class PhoneNumberSendTan implements
-        Authenticator,
-        AuthenticatorFactory,
-        ServerInfoAwareProviderFactory {
+public class PhoneNumberSendTan extends AbstractPhoneNumberAuthenticator {
 
     public static final String PROVIDER_ID = "phone-number-send-tan";
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
@@ -39,11 +33,8 @@ public class PhoneNumberSendTan implements
     };
     private static final Logger LOG = Logger.getLogger(PhoneNumberSendTan.class);
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-    private static final Map<String, String> infos = new HashMap<>();
 
     static {
-        infos.put("version", "26.0.7");
-
         ProviderConfigProperty property;
 
         // SMS Length
@@ -172,11 +163,6 @@ public class PhoneNumberSendTan implements
     }
 
     @Override
-    public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-
-    }
-
-    @Override
     public String getDisplayType() {
         return "SMS -4 Send SMS Tan";
     }
@@ -212,32 +198,8 @@ public class PhoneNumberSendTan implements
     }
 
     @Override
-    public Authenticator create(KeycloakSession session) {
-        return this;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    @Override
     public String getId() {
         return PROVIDER_ID;
-    }
-
-    @Override
-    public Map<String, String> getOperationalInfo() {
-        return infos;
     }
 
 }

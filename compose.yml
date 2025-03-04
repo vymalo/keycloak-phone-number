@@ -1,48 +1,40 @@
+x-keycloak-common-env: &keycloak-common-env
+  KEYCLOAK_ADMIN: admin
+  KEYCLOAK_ADMIN_PASSWORD: password
+  KC_LOG_CONSOLE_COLOR: 'true'
+
+x-keycloak-common-extra: &keycloak-common-extra
+  entrypoint: /bin/sh
+  command:
+    - -c
+    - |
+      set -ex
+      cp /tmp/libs-*/keycloak-*.jar /opt/keycloak/providers
+      /opt/keycloak/bin/kc.sh start-dev --import-realm
+  volumes:
+    - ./.docker/keycloak-config/:/opt/keycloak/data/import/:ro
+    - ./target/:/tmp/libs-target:ro
+  links:
+    - prism
+
 services:
-  keycloak:
-    image: quay.io/keycloak/keycloak:${KC_VERSION}
+  keycloak-21:
+    image: quay.io/keycloak/keycloak:21.1.2
     ports:
-      - '9100:9100'
+      - '9021:9021'
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: password
-      KC_HTTP_PORT: 9100
-      KC_LOG_CONSOLE_COLOR: 'true'
-      #KC_LOG_LEVEL: DEBUG # Uncomment to enable debug logging
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - |
-        set -ex
-        cp /opt/keycloak/providers/themes/*.jar /opt/keycloak/providers
-        cp /opt/keycloak/providers/target/keycloak-*.jar /opt/keycloak/providers
-        
-        /opt/keycloak/bin/kc.sh build
-        /opt/keycloak/bin/kc.sh start-dev --import-realm
-
-    volumes:
-      - ./.docker/keycloak-config/:/opt/keycloak/data/import/:ro
-      - ./target/:/opt/keycloak/providers/target:ro
-      - spi-theme:/opt/keycloak/providers/themes:ro
-    links:
-      - prism
-
-  # This service downloads the theme from the internet
-  download-theme:
-    image: busybox
-    command:
-      - /bin/sh
-      - -c
-      - |
-        set -ex;
-        wget -O /spi/vymalo-theme.jar https://github.com/vymalo/vymalo-keycloak-theme/releases/download/v2.1.2/theme-2.1.2.jar;
-        echo "Downloaded theme";
-        ls -la /spi;
-        
-        # Keep alive
-        tail -f /dev/null
-    volumes:
-      - spi-theme:/spi
+      <<: *keycloak-common-env
+      KC_HTTP_PORT: 9021
+    <<: *keycloak-common-extra
+  
+  keycloak-26:
+    image: quay.io/keycloak/keycloak:26.1.2
+    ports:
+      - '9026:9026'
+    environment:
+      <<: *keycloak-common-env
+      KC_HTTP_PORT: 9026
+    <<: *keycloak-common-extra
 
   # This is a mock server for the SMS API
   prism:
@@ -56,5 +48,3 @@ services:
       - /openapi/sms-open-api.yml
     volumes:
       - ./openapi:/openapi
-volumes:
-  spi-theme:
