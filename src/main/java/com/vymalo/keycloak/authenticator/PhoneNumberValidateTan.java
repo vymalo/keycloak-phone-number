@@ -1,24 +1,16 @@
 package com.vymalo.keycloak.authenticator;
 
 import com.vymalo.keycloak.constants.PhoneKey;
-import com.vymalo.keycloak.constants.PhoneNumberHelper;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.events.Errors;
-import org.keycloak.events.EventBuilder;
 import org.keycloak.models.AuthenticationExecutionModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.sessions.AuthenticationSessionModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @JBossLog
 @NoArgsConstructor
@@ -32,14 +24,14 @@ public class PhoneNumberValidateTan extends AbstractPhoneNumberAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        UserModel user = context.getUser();
-        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
-        String phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
-        String tanSecret = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_CODE_NAME);
+        final var user = context.getUser();
+        final var authenticationSession = context.getAuthenticationSession();
+        final var phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
+        final var hash = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_HASH);
 
         // we don't want people guessing usernames, so if there was a problem obtaining the user, the user will be null.
         // just reset login for with a success message
-        if (user == null || tanSecret == null || phoneNumber == null) {
+        if (user == null || hash == null || phoneNumber == null) {
             context.resetFlow();
             return;
         }
@@ -52,25 +44,26 @@ public class PhoneNumberValidateTan extends AbstractPhoneNumberAuthenticator {
 
     @Override
     public void action(AuthenticationFlowContext context) {
-        UserModel user = context.getUser();
-        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
-        String attemptedCode = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_CODE_NAME);
-        String phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
+        final var user = context.getUser();
+        final var authenticationSession = context.getAuthenticationSession();
+        final var hash = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_HASH);
+        final var phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
 
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        String cancel = formData.getFirst("cancel");
+        final var formData = context.getHttpRequest().getDecodedFormParameters();
+        final var cancel = formData.getFirst("cancel");
         if (cancel != null) {
             context.resetFlow();
             return;
         }
 
-        String code = formData.getFirst("code");
+        final var code = formData.getFirst("code");
+        final var validate$ = smsService.confirmSmsCode(phoneNumber, code, hash);
 
-        if (Objects.equals(attemptedCode, code)) {
+        if (validate$.isPresent() && validate$.get()) {
             context.setUser(user);
             context.success();
         } else {
-            EventBuilder event = context.getEvent();
+            final var event = context.getEvent();
             event.clone()
                     .detail("sms_code", code)
                     .user(user)
@@ -89,11 +82,6 @@ public class PhoneNumberValidateTan extends AbstractPhoneNumberAuthenticator {
     @Override
     public boolean requiresUser() {
         return true;
-    }
-
-    @Override
-    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-        return PhoneNumberHelper.handleConfiguredFor(user);
     }
 
     @Override

@@ -68,17 +68,6 @@
       ]
     }
   ],
-  "authenticatorConfig": [
-    {
-      "alias": "prism",
-      "config": {
-        "sms-api.attr.length": "6",
-        "sms-api.attr.url": "http://prism:4010",
-        "sms-api.auth.basic.username": "user",
-        "sms-api.auth.basic.password": "test"
-      }
-    }
-  ],
   "authenticationFlows": [
     {
       "alias": "Phone number login",
@@ -114,58 +103,9 @@
         {
           "authenticatorFlow": true,
           "requirement": "ALTERNATIVE",
-          "priority": 26,
-          "autheticatorFlow": true,
-          "flowAlias": "Phone number login Organization",
-          "userSetupAllowed": false
-        },
-        {
-          "authenticatorFlow": true,
-          "requirement": "ALTERNATIVE",
           "priority": 30,
           "autheticatorFlow": true,
           "flowAlias": "Phone number login forms",
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
-      "alias": "Phone number login Browser - Conditional Organization",
-      "description": "Flow to determine if the organization identity-first login is to be used",
-      "providerId": "basic-flow",
-      "topLevel": false,
-      "builtIn": false,
-      "authenticationExecutions": [
-        {
-          "authenticator": "conditional-user-configured",
-          "authenticatorFlow": false,
-          "requirement": "REQUIRED",
-          "priority": 10,
-          "autheticatorFlow": false,
-          "userSetupAllowed": false
-        },
-        {
-          "authenticator": "organization",
-          "authenticatorFlow": false,
-          "requirement": "ALTERNATIVE",
-          "priority": 20,
-          "autheticatorFlow": false,
-          "userSetupAllowed": false
-        }
-      ]
-    },
-    {
-      "alias": "Phone number login Organization",
-      "providerId": "basic-flow",
-      "topLevel": false,
-      "builtIn": false,
-      "authenticationExecutions": [
-        {
-          "authenticatorFlow": true,
-          "requirement": "CONDITIONAL",
-          "priority": 10,
-          "autheticatorFlow": true,
-          "flowAlias": "Phone number login Browser - Conditional Organization",
           "userSetupAllowed": false
         }
       ]
@@ -181,7 +121,7 @@
           "authenticator": "get-user-phone-number",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 20,
+          "priority": 0,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -189,7 +129,7 @@
           "authenticator": "phone-number-confirm-number",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 21,
+          "priority": 1,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -197,16 +137,15 @@
           "authenticator": "phone-number-choose-user",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 22,
+          "priority": 2,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
         {
-          "authenticatorConfig": "prism",
           "authenticator": "phone-number-send-tan",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 23,
+          "priority": 3,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -214,7 +153,7 @@
           "authenticator": "phone-number-validate-tan",
           "authenticatorFlow": false,
           "requirement": "REQUIRED",
-          "priority": 24,
+          "priority": 4,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
@@ -222,7 +161,7 @@
           "authenticator": "phone-number-update-user",
           "authenticatorFlow": false,
           "requirement": "ALTERNATIVE",
-          "priority": 25,
+          "priority": 5,
           "autheticatorFlow": false,
           "userSetupAllowed": false
         }

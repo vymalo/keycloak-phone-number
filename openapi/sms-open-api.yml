@@ -22,7 +22,7 @@ tags:
   - name: sms
     description: All about sending an SMS
 paths:
-  /send-sms:
+  /sms/send:
     post:
       tags:
         - sms
@@ -30,7 +30,7 @@ paths:
       description: Send an SMS to the phone number provided
       operationId: sendSms
       security:
-        - basic_auth: []
+        - basic_auth: [ ]
       requestBody:
         description: Send sms request
         content:
@@ -45,22 +45,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SendSmsResponse"
-        default:
-          description: successful operation
-          content: {}
+  /sms/validate:
+    post:
+      tags:
+        - sms
+      summary: Validate sms
+      description: Send an SMS to the phone number provided
+      operationId: validateSms
+      security:
+        - basic_auth: [ ]
+      requestBody:
+        description: Validate sms request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmTanRequest'
+        required: true
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfirmTanResponse"
 
 components:
   schemas:
+    ConfirmTanRequest:
+      type: object
+      properties:
+        hash:
+          type: string
+        code:
+          type: string
+        phoneNumber:
+          type: string
+      required:
+        - phoneNumber
+        - hash
+        - code
+    ConfirmTanResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+      required:
+        - valid
     SendSmsRequest:
       type: object
       properties:
         phoneNumber:
           type: string
-        smsCode:
-          type: number
       required:
         - phoneNumber
-        - smsCode
     SmsStatus:
       type: string
       enum:
@@ -75,6 +112,10 @@ components:
         description:
           type: string
           maxLength: 200
+        hash:
+          type: string
+      required:
+        - status
   securitySchemes:
     basic_auth:
       type: http

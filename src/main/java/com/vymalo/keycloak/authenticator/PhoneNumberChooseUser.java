@@ -8,12 +8,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.events.Errors;
-import org.keycloak.models.*;
-import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.UserProvider;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 @JBossLog
 @NoArgsConstructor
@@ -24,17 +22,6 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-
-    static {
-        final var property = new ProviderConfigProperty();
-        property.setName(ConfigKey.USER_PHONE_ATTRIBUTE_NAME);
-        property.setLabel("Phone attribute name");
-        property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setHelpText("User phone names's attribute");
-        configProperties.add(property);
-    }
-
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         final var event = context.getEvent();
@@ -43,8 +30,7 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
 
         final var realm = context.getRealm();
         final var attrName = Utils
-                .getConfigString(context.getAuthenticatorConfig(),
-                        ConfigKey.USER_PHONE_ATTRIBUTE_NAME, PhoneNumberHelper.DEFAULT_PHONE_KEY_NAME);
+                .getEnv(ConfigKey.USER_PHONE_ATTRIBUTE_NAME, PhoneNumberHelper.DEFAULT_PHONE_KEY_NAME);
 
         var user = context.getUser();
 
@@ -85,11 +71,6 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
     }
 
     @Override
-    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-        return PhoneNumberHelper.handleConfiguredFor(user);
-    }
-
-    @Override
     public String getDisplayType() {
         return "SMS -3 Choose user by Phone number";
     }
@@ -100,11 +81,6 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
     }
 
     @Override
-    public boolean isConfigurable() {
-        return true;
-    }
-
-    @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
     }
@@ -112,11 +88,6 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
     @Override
     public String getHelpText() {
         return "Choose a user, by his/her phone number, to reset credentials for";
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
     }
 
     @Override

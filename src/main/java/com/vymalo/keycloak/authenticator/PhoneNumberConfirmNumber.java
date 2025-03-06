@@ -1,26 +1,11 @@
 package com.vymalo.keycloak.authenticator;
 
-import com.google.i18n.phonenumbers.NumberParseException;
 import com.vymalo.keycloak.constants.PhoneKey;
 import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.models.AuthenticationExecutionModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.sessions.AuthenticationSessionModel;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
-import static com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import static com.vymalo.keycloak.constants.PhoneNumberHelper.handleConfiguredFor;
-import static com.vymalo.keycloak.constants.PhoneNumberHelper.phoneNumberUtil;
 
 @JBossLog
 @NoArgsConstructor
@@ -30,32 +15,23 @@ public class PhoneNumberConfirmNumber extends AbstractPhoneNumberAuthenticator {
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        UserModel existingUser = context.getUser();
+        final var existingUser = context.getUser();
 
         if (existingUser != null) {
             context.success();
             return;
         }
 
-        AuthenticationSessionModel authenticationSession = context.getAuthenticationSession();
-        String phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
+        final var authenticationSession = context.getAuthenticationSession();
+        final var phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
+        final var internationalized$ = smsService.format(phoneNumber);
 
-        PhoneNumber parsed = null;
-        try {
-            parsed = phoneNumberUtil.parse(phoneNumber, null);
-        } catch (NumberParseException ignored) {
-            // this can never happen, since we validate this phoneNumber a step before
-        }
-
-        String internationalized = phoneNumberUtil.format(parsed, PhoneNumberFormat.INTERNATIONAL);
-
-        Response challenge = context
+        final var challenge = context
                 .form()
-                .setAttribute("phoneNumber", internationalized)
+                .setAttribute("phoneNumber", internationalized$.orElseThrow())
                 .createForm("confirm-user-phone-number.ftl");
         context.challenge(challenge);
     }
@@ -76,11 +52,6 @@ public class PhoneNumberConfirmNumber extends AbstractPhoneNumberAuthenticator {
     }
 
     @Override
-    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-        return handleConfiguredFor(user);
-    }
-
-    @Override
     public String getDisplayType() {
         return "SMS -2 Confirm phone number";
     }
@@ -98,11 +69,6 @@ public class PhoneNumberConfirmNumber extends AbstractPhoneNumberAuthenticator {
     @Override
     public String getHelpText() {
         return "Confirm user's phone number before sending";
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
     }
 
     @Override

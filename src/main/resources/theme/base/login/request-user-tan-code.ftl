@@ -8,16 +8,17 @@
     <#elseif section = "form">
         <form id="kc-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
             <div id="kc-info-message">
-                <p>We sent a code at</p>
-                <p><b>${phoneNumber}</b></p>
+                <p class="confirm-field">We sent a code at</p>
+                <p class="phoneNumber-field"><b>${phoneNumber}</b></p>
             </div>
 
             <div class="${properties.kcFormGroupClass!}">
                 <label for="smsCode"
                        class="${properties.kcLabelClass!}">
-                    ${msg("Country")}
+                    ${msg("Code")}
                 </label>
-                <input type="number"
+                <input type="text"
+                       placeholder="${msg("Code")}"
                        id="smsCode"
                        name="code"
                        class="${properties.kcInputClass!}"

@@ -1,5 +1,6 @@
 package com.vymalo.keycloak.authenticator;
 
+import com.vymalo.keycloak.services.SmsService;
 import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -8,9 +9,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ServerInfoAwareProviderFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractPhoneNumberAuthenticator implements
@@ -18,11 +22,16 @@ public abstract class AbstractPhoneNumberAuthenticator implements
         AuthenticatorFactory,
         ServerInfoAwareProviderFactory {
 
+    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
+
     private static final Map<String, String> infos = new HashMap<>();
 
     static {
         infos.put("version", "26.1.3");
+        infos.put("repo", "https://github.com/vymalo/keycloak-phone-number");
     }
+
+    protected final SmsService smsService = SmsService.getInstance();
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -45,11 +54,6 @@ public abstract class AbstractPhoneNumberAuthenticator implements
     @Override
     public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
 
-    }
-
-    @Override
-    public String getReferenceCategory() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -77,5 +81,18 @@ public abstract class AbstractPhoneNumberAuthenticator implements
     @Override
     public Map<String, String> getOperationalInfo() {
         return infos;
+    }
+
+    @Override
+    public List<ProviderConfigProperty> getConfigProperties() {
+        return configProperties;
+    }
+
+    @Override
+    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
+        if (user != null) {
+            return smsService.handleConfiguredFor(user);
+        }
+        return true;
     }
 }

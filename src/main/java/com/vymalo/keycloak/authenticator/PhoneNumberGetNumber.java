@@ -1,12 +1,10 @@
 package com.vymalo.keycloak.authenticator;
 
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.Phonenumber;
 import com.vymalo.keycloak.constants.ConfigKey;
 import com.vymalo.keycloak.constants.PhoneKey;
 import com.vymalo.keycloak.constants.PhoneNumberHelper;
 import com.vymalo.keycloak.constants.Utils;
-import com.vymalo.keycloak.model.CountryPhoneCode;
+import com.vymalo.keycloak.services.SmsService;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.NoArgsConstructor;
@@ -17,15 +15,8 @@ import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.broker.AbstractIdpAuthenticator;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.models.AuthenticationExecutionModel;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.provider.ProviderConfigProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import static org.keycloak.models.DefaultActionTokenKey.ACTION_TOKEN_USER_ID;
 
 @JBossLog
@@ -37,22 +28,9 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-
-    static {
-        ProviderConfigProperty property;
-
-        // Phone name
-        property = new ProviderConfigProperty();
-        property.setName(ConfigKey.USER_PHONE_ATTRIBUTE_NAME);
-        property.setLabel("Phone attribute name");
-        property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setHelpText("User phone names's attribute");
-        configProperties.add(property);
-    }
-
     private static boolean handlePreExistingUser(AuthenticationFlowContext context, UserModel existingUser) {
-        String attrName = Utils.getConfigString(context.getAuthenticatorConfig(), ConfigKey.USER_PHONE_ATTRIBUTE_NAME, PhoneNumberHelper.DEFAULT_PHONE_KEY_NAME);
+        final var attrName = Utils
+                .getEnv(ConfigKey.USER_PHONE_ATTRIBUTE_NAME, PhoneNumberHelper.DEFAULT_PHONE_KEY_NAME);
         final var phoneNumbers = existingUser.getAttributeStream(attrName).toList();
         if (!phoneNumbers.isEmpty()) {
             String phoneNumber = phoneNumbers.get(0);
@@ -61,7 +39,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
             context.setUser(existingUser);
             Response challenge = context.form()
                     .setAttribute(attrName, phoneNumber)
-                    .setAttribute("countries", CountryPhoneCode.allCountries)
+                    .setAttribute("countries", SmsService.getAllCountries())
                     .createForm("request-user-phone-number.ftl");
             context.challenge(challenge);
             return true;
@@ -85,7 +63,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
 
         final var challenge = context.form()
                 .setAttribute("regionPrefix", "")
-                .setAttribute("countries", CountryPhoneCode.allCountries)
+                .setAttribute("countries", SmsService.getAllCountries())
                 .createForm("request-user-phone-number.ftl");
         context.challenge(challenge);
     }
@@ -111,7 +89,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
             Response challenge = context.form()
                     .setError("missing_phone_number_or_region")
                     .setAttribute("regionPrefix", regionPrefix)
-                    .setAttribute("countries", CountryPhoneCode.allCountries)
+                    .setAttribute("countries", SmsService.getAllCountries())
                     .createForm("request-user-phone-number.ftl");
             context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, challenge);
             return;
@@ -123,38 +101,29 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
             phoneNumberWithoutPrefix = StringUtils.removeStart(phoneNumberWithoutPrefix, "0");
         }
 
-        var phoneNumber = regionPrefix + phoneNumberWithoutPrefix;
+        final var phoneNumber = regionPrefix + phoneNumberWithoutPrefix;
 
-        Phonenumber.PhoneNumber number;
-        try {
-            number = PhoneNumberHelper.phoneNumberUtil.parse(phoneNumber, null);
-        } catch (NumberParseException e) {
+        final var phoneNumber$ = smsService.format(phoneNumber);
+        if (phoneNumber$.isEmpty()) {
             event.clone()
                     .detail("phone_number", phoneNumber)
-                    .error("parse number error: " + e.getMessage());
+                    .error("parse number error: Can't parse phone number");
             context.clearUser();
             Response challenge = context
                     .form()
                     .setError("wrong_phone_number_or_region")
                     .setAttribute("phoneNumber", phoneNumberWithoutPrefix)
                     .setAttribute("regionPrefix", regionPrefix)
-                    .setAttribute("countries", CountryPhoneCode.allCountries)
+                    .setAttribute("countries", SmsService.getAllCountries())
                     .createForm("request-user-phone-number.ftl");
             context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, challenge);
             return;
         }
 
-        phoneNumber = PhoneNumberHelper.phoneNumberUtil.format(number, PhoneNumberFormat.E164);
-
         context
                 .getAuthenticationSession()
-                .setAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER, phoneNumber);
+                .setAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER, phoneNumber$.get());
         context.success();
-    }
-
-    @Override
-    public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-        return PhoneNumberHelper.handleConfiguredFor(user);
     }
 
     @Override
@@ -166,12 +135,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
     public String getReferenceCategory() {
         return "get-phone-number";
     }
-
-    @Override
-    public boolean isConfigurable() {
-        return true;
-    }
-
+    
     @Override
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         return REQUIREMENT_CHOICES;
@@ -180,11 +144,6 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
     @Override
     public String getHelpText() {
         return "Get a user by his phone number";
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
     }
 
     @Override
