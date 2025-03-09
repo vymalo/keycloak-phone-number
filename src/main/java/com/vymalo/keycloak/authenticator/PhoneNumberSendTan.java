@@ -26,9 +26,8 @@ public class PhoneNumberSendTan extends AbstractPhoneNumberAuthenticator {
 
         if (hash$.isPresent()) {
             final var hash = hash$.get();
-            event.clone()
-                    .detail("sms_hash", hash)
-                    .success();
+            event.detail("sms_hash", hash)
+                 .success();
 
             context
                     .getAuthenticationSession()
