@@ -4,8 +4,9 @@ x-keycloak-common-env: &keycloak-common-env
   KC_LOG_CONSOLE_COLOR: 'true'
   SMS_API_URL: http://prism:4010
   SMS_API_COUNTRY_PATTERN: 'cm|de|fr'
-  SMS_API_AUTH_USERNAME: someuser
-  SMS_API_AUTH_PASSWORD: somepassword
+  OAUTH2_CLIENT_ID: some-client-id
+  OAUTH2_CLIENT_SECRET: some-client-secret
+  OAUTH2_TOKEN_ENDPOINT: http://prism:4010/token  # Mock token endpoint
 
 x-keycloak-common-extra: &keycloak-common-extra
   entrypoint: /bin/sh
