@@ -64,8 +64,7 @@ public class PhoneNumberValidateTan extends AbstractPhoneNumberAuthenticator {
             context.success();
         } else {
             final var event = context.getEvent();
-            event.clone()
-                    .detail("sms_code", code)
+            event.detail("sms_code", code)
                     .user(user)
                     .error(Errors.INVALID_CODE);
 

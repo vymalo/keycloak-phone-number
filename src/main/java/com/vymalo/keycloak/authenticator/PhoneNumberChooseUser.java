@@ -35,8 +35,7 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
         var user = context.getUser();
 
         if (user != null && !user.isEnabled()) {
-            event.clone()
-                    .detail("phone_number", phoneNumber)
+            event.detail("phone_number", phoneNumber)
                     .user(user)
                     .error(Errors.USER_DISABLED);
             context.clearUser();

@@ -29,6 +29,12 @@ authenticate using their phone number. The process includes:
 This modular plugin uses a multi-step flow and is designed with separation of concerns in mind, using a dedicated
 service layer for SMS and phone number processing.
 
+## New Feature: OAuth2 Authentication for SMS Service
+
+The `SmsService` has been refactored to replace **Basic Authentication** with **OAuth2 Client Credentials Grant** for secure communication with the SMS provider.  
+
+The plugin now fetches an **access token** from a `/token` endpoint, using it for `/sms/send` and `/sms/validate` API calls.
+
 ---
 
 ## 2. How to Use It
@@ -56,8 +62,9 @@ docker run -d \
   -e KEYCLOAK_ADMIN_PASSWORD=password \
   -e SMS_API_URL=http://your-sms-api-url \
   -e SMS_API_COUNTRY_PATTERN='cm|de|fr' \
-  -e SMS_API_AUTH_USERNAME=someuser \
-  -e SMS_API_AUTH_PASSWORD=somepassword \
+  -e OAUTH2_CLIENT_ID=some-client-id \
+  -e OAUTH2_CLIENT_SECRET=some-cient-secret \
+  -e OAUTH2_TOKEN_ENDPOINT=http://your-sms-api-url/token \
   -v /path/to/keycloak-phonenumber-login.jar:/opt/keycloak/providers/keycloak-phonenumber-login.jar \
   quay.io/keycloak/keycloak:26.1.2 start-dev
 ```
@@ -110,10 +117,12 @@ spec:
               value: "http://your-sms-api-url"
             - name: SMS_API_COUNTRY_PATTERN
               value: "cm|de|fr"
-            - name: SMS_API_AUTH_USERNAME
-              value: "someuser"
-            - name: SMS_API_AUTH_PASSWORD
-              value: "somepassword"
+            - name: OAUTH2_CLIENT_ID
+              value: "some-client-id"
+            - name: OAUTH2_CLIENT_SECRET
+              value: "some-client-secret"
+            - name: OAUTH2_TOKEN_ENDPOINT
+              value: "http://your-sms-api-url/token"
           volumeMounts:
             - name: plugin-volume
               mountPath: /opt/keycloak/providers
@@ -128,24 +137,19 @@ it into the appropriate directory.
 
 The following environment variables are used by the plugin:
 
-- **KEYCLOAK_ADMIN:**  
-  The administrator username for Keycloak.
-- **KEYCLOAK_ADMIN_PASSWORD:**  
-  The administrator password for Keycloak.
-- **KC_LOG_CONSOLE_COLOR:**  
-  Enables colored logging in the console (set to 'true' or 'false').
-- **KC_HTTP_PORT:**  
-  The HTTP port on which Keycloak runs.
-- **SMS_API_URL:**  
-  The base URL of the SMS API service.
-- **SMS_API_COUNTRY_PATTERN:**  
-  A regex pattern to match supported phone number country codes.
-- **SMS_API_AUTH_USERNAME:**  
-  The basic auth username for the SMS API.
-- **SMS_API_AUTH_PASSWORD:**  
-  The basic auth password for the SMS API.
+- **KEYCLOAK_ADMIN**: The administrator username for Keycloak.  
+- **KEYCLOAK_ADMIN_PASSWORD**: The administrator password for Keycloak.  
+- **KC_LOG_CONSOLE_COLOR**: Enables colored logging in the console (set to `'true'` or `'false'`).  
+- **KC_HTTP_PORT**: The HTTP port on which Keycloak runs.  
+- **SMS_API_URL**: The base URL of the SMS API service.  
+- **SMS_API_COUNTRY_PATTERN**: A regex pattern to match supported phone number country codes.  
+- **OAUTH2_CLIENT_ID**: The client ID for OAuth2 authentication with the SMS provider.  
+- **OAUTH2_CLIENT_SECRET**: The client secret for OAuth2 authentication with the SMS provider.  
+- **OAUTH2_TOKEN_ENDPOINT**: The URL of the token endpoint for OAuth2 authentication (e.g., `http://your-sms-api-url/token`).  
 
-Configure these variables in your deployment (Docker, Kubernetes, etc.) as shown in the examples above.
+**Note**: The older `SMS_API_AUTH_USERNAME` and `SMS_API_AUTH_PASSWORD` variables are **deprecated** and replaced with the above OAuth2 variables for enhanced security.  
+
+Configure these variables in your deployment (Docker, Kubernetes, etc.) as shown in the examples above.  
 
 ---
 
