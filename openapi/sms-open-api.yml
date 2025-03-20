@@ -30,6 +30,7 @@ paths:
       description: Send an SMS to the phone number provided
       operationId: sendSms
       security:
+        - basic_auth: []
         - oauth2: []
       requestBody:
         description: Send sms request
@@ -53,6 +54,7 @@ paths:
       description: Send an SMS to the phone number provided
       operationId: validateSms
       security:
+        - basic_auth: []
         - oauth2: []
       requestBody:
         description: Validate sms request
@@ -69,60 +71,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ConfirmTanResponse"
 
-  /token:  # New endpoint for OAuth2 token issuance
-    post:
-      tags:
-        - sms
-      summary: Get OAuth2 access token
-      description: Issues an access token using the Client Credentials Grant
-      operationId: getToken
-      requestBody:
-        description: Token request
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                grant_type:
-                  type: string
-                  example: "client_credentials"
-                client_id:
-                  type: string
-                  example: "some-client-id"
-                client_secret:
-                  type: string
-                  example: "some-client-secret"
-              required:
-                - grant_type
-                - client_id
-                - client_secret
-      responses:
-        200:
-          description: "Token issued successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  access_token:
-                    type: string
-                    example: "mock-access-token"
-                  token_type:
-                    type: string
-                    example: "Bearer"
-                  expires_in:
-                    type: integer
-                    example: 3600
-        401:
-          description: "Invalid client credentials"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "invalid_client"
 components:
   schemas:
     ConfirmTanRequest:
@@ -171,9 +119,12 @@ components:
       required:
         - status
   securitySchemes:
+    basic_auth:
+      type: http
+      scheme: basic
     oauth2:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: /token
+          tokenUrl: 'https://external-auth-server.example.com/oauth/token'  # Placeholder
           scopes: {}
