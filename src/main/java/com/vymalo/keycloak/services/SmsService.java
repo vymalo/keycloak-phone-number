@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,10 +43,12 @@ public class SmsService {
     private static final SmsService instance;
 
     private static String accessToken;
-    private static long tokenExpirationTime; // Timestamp (millis) when token expires
+    private static long tokenExpirationTime; // Timestamp (millis)
 
     static {
         final var smsUrl = Utils.getEnv(ConfigKey.CONF_PRP_SMS_URL);
+        final var basicUsr = Utils.getEnv(ConfigKey.BASIC_AUTH_USERNAME);
+        final var basicPwd = Utils.getEnv(ConfigKey.BASIC_AUTH_PASSWORD);
         final var clientId = Utils.getEnv("OAUTH2_CLIENT_ID");
         final var clientSecret = Utils.getEnv("OAUTH2_CLIENT_SECRET");
         final var tokenEndpoint = Utils.getEnv("OAUTH2_TOKEN_ENDPOINT");
@@ -54,11 +57,20 @@ public class SmsService {
         final var apiClient = new ApiClient();
         apiClient.updateBaseUri(smsUrl);
         apiClient.setRequestInterceptor(builder -> {
-            try {
-                String token = getAccessToken(clientId, clientSecret, tokenEndpoint);
-                builder.header("Authorization", "Bearer " + token);
-            } catch (Exception e) {
-                log.error("Failed to set OAuth2 token", e);
+            // Use OAuth2 if token endpoint and credentials are provided
+            if (StringUtils.isNotEmpty(tokenEndpoint) && StringUtils.isNotEmpty(clientId) && StringUtils.isNotEmpty(clientSecret)) {
+                try {
+                    String token = getAccessToken(clientId, clientSecret, tokenEndpoint);
+                    builder.header("Authorization", "Bearer " + token);
+                } catch (Exception e) {
+                    log.error("Failed to set OAuth2 token, falling back to no auth", e);
+                }
+            }
+            // Fall back to Basic Auth if credentials are provided
+            else if (StringUtils.isNotEmpty(basicUsr) && StringUtils.isNotEmpty(basicPwd)) {
+                final var valueToEncode = basicUsr + ":" + basicPwd;
+                final var basicAuth = "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
+                builder.header("Authorization", basicAuth);
             }
         });
 
@@ -108,7 +120,7 @@ public class SmsService {
                     Map<String, Object> tokenData = JsonSerialization.readValue(json, Map.class);
                     accessToken = (String) tokenData.get("access_token");
                     int expiresIn = (int) tokenData.get("expires_in");
-                    tokenExpirationTime = System.currentTimeMillis() + (expiresIn * 1000L) - 30000;
+                    tokenExpirationTime = System.currentTimeMillis() + (expiresIn * 1000L) - 30000; // 30 seconds before expiration
                 }
             } catch (Exception e) {
                 throw new IOException("Failed to fetch OAuth2 token", e);
