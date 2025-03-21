@@ -1,14 +1,14 @@
 x-keycloak-common-env: &keycloak-common-env
   KEYCLOAK_ADMIN: admin
   KEYCLOAK_ADMIN_PASSWORD: password
-  KC_LOG_CONSOLE_COLOR: 'true'
+  KC_LOG_CONSOLE_COLOR: "true"
   SMS_API_URL: http://prism:4010
-  SMS_API_COUNTRY_PATTERN: 'cm|de|fr'
+  SMS_API_COUNTRY_PATTERN: "cm|de|fr"
   SMS_API_AUTH_USERNAME: someuser
   SMS_API_AUTH_PASSWORD: somepassword
   OAUTH2_CLIENT_ID: some-client-id
   OAUTH2_CLIENT_SECRET: some-client-secret
-  OAUTH2_TOKEN_ENDPOINT: http://auth-server.example.com/oauth/token  # External token endpoint
+  OAUTH2_TOKEN_ENDPOINT: http://token-mock:4011/token # External token endpoint
 
 x-keycloak-common-extra: &keycloak-common-extra
   entrypoint: /bin/sh
@@ -28,7 +28,7 @@ services:
   keycloak-22:
     image: quay.io/keycloak/keycloak:22.0.5
     ports:
-      - '9022:9022'
+      - "9022:9022"
     environment:
       <<: *keycloak-common-env
       KC_HTTP_PORT: 9022
@@ -36,7 +36,7 @@ services:
   keycloak-23:
     image: quay.io/keycloak/keycloak:23.0.7
     ports:
-      - '9023:9023'
+      - "9023:9023"
     environment:
       <<: *keycloak-common-env
       KC_HTTP_PORT: 9023
@@ -44,7 +44,7 @@ services:
   keycloak-24:
     image: quay.io/keycloak/keycloak:24.0.5
     ports:
-      - '9024:9024'
+      - "9024:9024"
     environment:
       <<: *keycloak-common-env
       KC_HTTP_PORT: 9024
@@ -53,7 +53,7 @@ services:
   keycloak-25:
     image: quay.io/keycloak/keycloak:25.0.6
     ports:
-      - '9025:9025'
+      - "9025:9025"
     environment:
       <<: *keycloak-common-env
       KC_HTTP_PORT: 9025
@@ -62,7 +62,7 @@ services:
   keycloak-26:
     image: quay.io/keycloak/keycloak:26.1.3
     ports:
-      - '9026:9026'
+      - "9026:9026"
     environment:
       <<: *keycloak-common-env
       KC_HTTP_PORT: 9026
@@ -80,3 +80,16 @@ services:
       - /openapi/sms-open-api.yml
     volumes:
       - ./openapi:/openapi
+
+  # Mock server for OAuth2 token endpoint
+  token-mock:
+    image: node:18-slim
+    ports:
+      - "4011:4011"
+    command: >
+      /bin/sh -c "
+      npm install -g json-server &&
+      json-server --host 0.0.0.0 --port 4011 /tmp/token.json
+      "
+    volumes:
+      - ./token.json:/tmp/token.json:ro

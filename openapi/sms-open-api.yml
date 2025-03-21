@@ -46,6 +46,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SendSmsResponse"
+        401:
+          description: "Unauthorized - Invalid or missing authentication"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+                    
   /sms/validate:
     post:
       tags:
@@ -70,6 +81,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConfirmTanResponse"
+        401:
+          description: "Unauthorized - Invalid or missing authentication"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
 
 components:
   schemas:
