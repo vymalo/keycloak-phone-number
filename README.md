@@ -62,7 +62,7 @@ docker run -d \
   -e SMS_API_AUTH_PASSWORD=somepassword \
   -e OAUTH2_CLIENT_ID=some-client-id \
   -e OAUTH2_CLIENT_SECRET=some-client-secret \
-  -e OAUTH2_TOKEN_ENDPOINT=http://auth-server.example.com/oauth/token \
+  -e OAUTH2_TOKEN_ENDPOINT=http://token-mock:8080/token \
   -v /path/to/keycloak-phonenumber-login.jar:/opt/keycloak/providers/keycloak-phonenumber-login.jar \
   quay.io/keycloak/keycloak:26.1.2 start-dev
 ```
@@ -124,7 +124,7 @@ spec:
             - name: OAUTH2_CLIENT_SECRET
               value: "some-client-secret"
             - name: OAUTH2_TOKEN_ENDPOINT
-              value: "http://auth-server.example.com/oauth/token"
+              value: "http://token-mock:8080/token"
           volumeMounts:
             - name: plugin-volume
               mountPath: /opt/keycloak/providers
@@ -149,7 +149,7 @@ The following environment variables are used by the plugin:
 - **SMS_API_AUTH_PASSWORD**: The basic auth password for the SMS API.
 - **OAUTH2_CLIENT_ID**: The client ID for OAuth2 authentication with the SMS provider.  
 - **OAUTH2_CLIENT_SECRET**: The client secret for OAuth2 authentication with the SMS provider.  
-- **OAUTH2_TOKEN_ENDPOINT**: The URL of the token endpoint for OAuth2 authentication (e.g., `http://your-sms-api-url/token`).  
+- **OAUTH2_TOKEN_ENDPOINT**: The URL of the token endpoint for OAuth2 authentication (e.g., `http://token-mock:8080/token` for testing, or `http://your-auth-server/oauth/token` in production).
 
 
 Configure these variables in your deployment (Docker, Kubernetes, etc.) as shown in the examples above.  

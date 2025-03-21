@@ -14,6 +14,8 @@ externalDocs:
   description: Find out more about calling setting up an external service to verify phone number
   url: https://ssegning.com
 servers:
+  - url: http://prism:4010
+    description: Mock server
   - url: http://localhost:8080
     description: Dev server
   - url: https://sms-api-server:port
@@ -147,5 +149,5 @@ components:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: 'https://external-auth-server.example.com/oauth/token'  # Placeholder
+          tokenUrl: 'http://token-mock:8080/token'
           scopes: {}
