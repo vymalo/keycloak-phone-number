@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/token",
+    "headers": {
+      "Content-Type": {
+        "contains": "application/x-www-form-urlencoded"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "access_token": "mock-token-12345",
+      "expires_in": 3600,
+      "token_type": "Bearer"
+    }
+  }
+}
