@@ -14,6 +14,8 @@ externalDocs:
   description: Find out more about calling setting up an external service to verify phone number
   url: https://ssegning.com
 servers:
+  - url: http://prism:4010
+    description: Mock server
   - url: http://localhost:8080
     description: Dev server
   - url: https://sms-api-server:port
@@ -30,7 +32,8 @@ paths:
       description: Send an SMS to the phone number provided
       operationId: sendSms
       security:
-        - basic_auth: [ ]
+        - basic_auth: []
+        - oauth2: []
       requestBody:
         description: Send sms request
         content:
@@ -45,6 +48,17 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SendSmsResponse"
+        401:
+          description: "Unauthorized - Invalid or missing authentication"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
+                    
   /sms/validate:
     post:
       tags:
@@ -53,7 +67,8 @@ paths:
       description: Send an SMS to the phone number provided
       operationId: validateSms
       security:
-        - basic_auth: [ ]
+        - basic_auth: []
+        - oauth2: []
       requestBody:
         description: Validate sms request
         content:
@@ -68,6 +83,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConfirmTanResponse"
+        401:
+          description: "Unauthorized - Invalid or missing authentication"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "unauthorized"
 
 components:
   schemas:
@@ -120,3 +145,9 @@ components:
     basic_auth:
       type: http
       scheme: basic
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: 'http://token-mock:8080/token'
+          scopes: {}
