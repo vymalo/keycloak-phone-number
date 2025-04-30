@@ -14,7 +14,7 @@
         <keycloak.version>26.2.2</keycloak.version>
         <googlecode.geocoder.version>3.3</googlecode.geocoder.version>
         <googlecode.libphonenumber.version>9.0.3</googlecode.libphonenumber.version>
-        <openapi-generator.version>7.12.0</openapi-generator.version>
+        <openapi-generator.version>7.13.0</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
     </properties>
 
