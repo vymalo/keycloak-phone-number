@@ -63,7 +63,12 @@ public class SmsService {
                     String token = getAccessToken(clientId, clientSecret, tokenEndpoint);
                     builder.header("Authorization", "Bearer " + token);
                 } catch (Exception e) {
-                    log.error("Failed to set OAuth2 token, falling back to no auth", e);
+                    log.error("Failed to set OAuth2 token, falling back to basic auth", e);
+                    if (StringUtils.isNotEmpty(basicUsr) && StringUtils.isNotEmpty(basicPwd)) {
+                        final var valueToEncode = basicUsr + ":" + basicPwd;
+                        final var basicAuth = "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
+                        builder.header("Authorization", basicAuth);
+                    }
                 }
             }
             // Fall back to Basic Auth if credentials are provided
