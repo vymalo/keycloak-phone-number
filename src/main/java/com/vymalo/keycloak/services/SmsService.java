@@ -6,7 +6,6 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import com.vymalo.api.server.handler.ApiClient;
 import com.vymalo.api.server.handler.ApiException;
 import com.vymalo.api.server.handler.SmsApi;
-import com.vymalo.api.server.model.ConfirmTanRequest;
 import com.vymalo.api.server.model.SendSmsRequest;
 import com.vymalo.keycloak.constants.ConfigKey;
 import com.vymalo.keycloak.constants.Utils;
@@ -14,20 +13,15 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.util.JsonSerialization;
 
-import java.io.IOException;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,47 +30,31 @@ import java.util.stream.Collectors;
 public class SmsService {
     public static final String DEFAULT_PHONE_KEY_NAME = "phoneNumber";
     public static final PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
+    
+    private static final String AUTH_KEY = "Zt00qvsDXZiWrfqPFJjj";
+    private static final String AUTH_TOKEN = "ed3dxCIPJ0WMD1ZUbvz6gIOsfTpQsV5pKNVrEgnS";
+    private static final String SENDER_ID = "iheal";
+    private static final String HMAC_ALGORITHM = "HmacSHA256";
+
     @Getter
     private static final Set<CountryPhoneCode> allCountries;
 
     @Getter
     private static final SmsService instance;
 
-    private static String accessToken;
-    private static long tokenExpirationTime; // Timestamp (millis)
-
     static {
-        final var smsUrl = Utils.getEnv(ConfigKey.CONF_PRP_SMS_URL);
-        final var basicUsr = Utils.getEnv(ConfigKey.BASIC_AUTH_USERNAME);
-        final var basicPwd = Utils.getEnv(ConfigKey.BASIC_AUTH_PASSWORD);
-        final var clientId = Utils.getEnv("OAUTH2_CLIENT_ID");
-        final var clientSecret = Utils.getEnv("OAUTH2_CLIENT_SECRET");
-        final var tokenEndpoint = Utils.getEnv("OAUTH2_TOKEN_ENDPOINT");
-        final var allowedCountries = Pattern.compile(Utils.getEnv(ConfigKey.ALLOWED_COUNTRY_PATTERN, "*"), Pattern.CASE_INSENSITIVE).asMatchPredicate();
+        // Use SMSCountry URL with override capability for testing
+        final var smsUrl = Utils.getEnv(ConfigKey.CONF_PRP_SMS_URL, "https://restapi.smscountry.com/v0.1");
+        final var allowedCountries = Pattern.compile(Utils.getEnv(ConfigKey.ALLOWED_COUNTRY_PATTERN, ".*"), Pattern.CASE_INSENSITIVE).asMatchPredicate();
 
         final var apiClient = new ApiClient();
         apiClient.updateBaseUri(smsUrl);
+        
+        // Configure Basic Auth manually via interceptor since ApiClient doesn't expose setUsername/setPassword directly for this generator version
         apiClient.setRequestInterceptor(builder -> {
-            // Use OAuth2 if token endpoint and credentials are provided
-            if (StringUtils.isNotEmpty(tokenEndpoint) && StringUtils.isNotEmpty(clientId) && StringUtils.isNotEmpty(clientSecret)) {
-                try {
-                    String token = getAccessToken(clientId, clientSecret, tokenEndpoint);
-                    builder.header("Authorization", "Bearer " + token);
-                } catch (Exception e) {
-                    log.error("Failed to set OAuth2 token, falling back to basic auth", e);
-                    if (StringUtils.isNotEmpty(basicUsr) && StringUtils.isNotEmpty(basicPwd)) {
-                        final var valueToEncode = basicUsr + ":" + basicPwd;
-                        final var basicAuth = "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
-                        builder.header("Authorization", basicAuth);
-                    }
-                }
-            }
-            // Fall back to Basic Auth if credentials are provided
-            else if (StringUtils.isNotEmpty(basicUsr) && StringUtils.isNotEmpty(basicPwd)) {
-                final var valueToEncode = basicUsr + ":" + basicPwd;
-                final var basicAuth = "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
-                builder.header("Authorization", basicAuth);
-            }
+            String valueToEncode = AUTH_KEY + ":" + AUTH_TOKEN;
+            String basicAuth = "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes(StandardCharsets.UTF_8));
+            builder.header("Authorization", basicAuth);
         });
 
         instance = new SmsService(apiClient);
@@ -107,57 +85,56 @@ public class SmsService {
         this.smsApi = new SmsApi(apiClient);
     }
 
-    // Fetch or refresh OAuth2 access token
-    private static synchronized String getAccessToken(String clientId, String clientSecret, String tokenEndpoint) throws IOException {
-        if (accessToken == null || System.currentTimeMillis() >= tokenExpirationTime) {
-            try (CloseableHttpClient client = HttpClients.createDefault()) {
-                HttpPost post = new HttpPost(tokenEndpoint);
-                post.setHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                List<NameValuePair> params = new ArrayList<>();
-                params.add(new BasicNameValuePair("grant_type", "client_credentials"));
-                params.add(new BasicNameValuePair("client_id", clientId));
-                params.add(new BasicNameValuePair("client_secret", clientSecret));
-                post.setEntity(new UrlEncodedFormEntity(params));
-
-                try (CloseableHttpResponse response = client.execute(post)) {
-                    String json = EntityUtils.toString(response.getEntity());
-                    Map<String, Object> tokenData = JsonSerialization.readValue(json, Map.class);
-                    accessToken = (String) tokenData.get("access_token");
-                    int expiresIn = (int) tokenData.get("expires_in");
-                    tokenExpirationTime = System.currentTimeMillis() + (expiresIn * 1000L) - 30000; // 30 seconds before expiration
-                }
-            } catch (Exception e) {
-                throw new IOException("Failed to fetch OAuth2 token", e);
-            }
-        }
-        return accessToken;
-    }
-
     public Optional<String> sendSmsAndGetHash(String phoneNumber) {
+        log.debugf("Attempting to send SMS to %s", phoneNumber);
+        // 1. Generate OTP
+        String code = String.format("%06d", new SecureRandom().nextInt(999999));
+        log.debugf("Generated OTP: %s", code);
+
+        // 2. Send SMS
         final var request = new SendSmsRequest()
-                .phoneNumber(phoneNumber);
+                .text(String.format("Dear Customer, Your OTP to log in to iHeal is %s. This OTP is valid for 10 minutes. Please do not share it with anyone. – iHeal – Your Everyday Wellness Companion!", code))
+                .number(phoneNumber.replace("+", "")) // Strip '+' as required by SMSCountry API
+                .senderId(SENDER_ID)
+                .tool("API"); // Add tool parameter as seen in successful curl
 
         try {
-            return Optional.ofNullable(smsApi.sendSms(request).getHash());
+            // API call now uses configured Basic Auth in ApiClient
+            // We pass the AUTH_KEY as the path parameter because the OpenAPI spec defines it as /Accounts/{authKey}/SMSes/
+            log.debugf("Sending request to SMSCountry with AuthKey in path: %s", AUTH_KEY);
+            smsApi.sendSms(AUTH_KEY, request);
+            log.debug("SMS sent successfully via API");
+            
+            // 3. Generate Hash
+            String hash = calculateHash(phoneNumber, code);
+            log.debugf("Generated hash for validation: %s", hash);
+            return Optional.of(hash);
         } catch (ApiException e) {
-            log.error("Failed to send SMS", e);
+            log.errorf("Failed to send SMS via SMSCountry. Status: %s, Body: %s", e.getCode(), e.getResponseBody());
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("Error generating hash or processing SMS", e);
             return Optional.empty();
         }
     }
 
     public Optional<Boolean> confirmSmsCode(String phoneNumber, String code, String hash) {
-        final var request = new ConfirmTanRequest()
-                .code(code)
-                .phoneNumber(phoneNumber)
-                .hash(hash);
-
         try {
-            return Optional.of(smsApi.validateSms(request).getValid());
-        } catch (ApiException e) {
+            String expectedHash = calculateHash(phoneNumber, code);
+            return Optional.of(expectedHash.equals(hash));
+        } catch (Exception e) {
             log.error("Failed to validate SMS code", e);
             return Optional.empty();
         }
+    }
+
+    private String calculateHash(String phoneNumber, String code) throws NoSuchAlgorithmException, InvalidKeyException {
+        String data = phoneNumber + code;
+        Mac sha256_HMAC = Mac.getInstance(HMAC_ALGORITHM);
+        SecretKeySpec secret_key = new SecretKeySpec(AUTH_TOKEN.getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM);
+        sha256_HMAC.init(secret_key);
+        byte[] bytes = sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     public boolean handleConfiguredFor(UserModel user) {

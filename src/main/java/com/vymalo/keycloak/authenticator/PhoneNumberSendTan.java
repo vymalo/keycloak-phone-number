@@ -1,11 +1,15 @@
 package com.vymalo.keycloak.authenticator;
 
+import com.vymalo.keycloak.constants.ConfigKey;
 import com.vymalo.keycloak.constants.PhoneKey;
+import com.vymalo.keycloak.constants.PhoneNumberHelper;
+import com.vymalo.keycloak.constants.Utils;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.models.AuthenticationExecutionModel;
+import org.keycloak.models.UserModel;
 
 @JBossLog
 @NoArgsConstructor
@@ -19,8 +23,30 @@ public class PhoneNumberSendTan extends AbstractPhoneNumberAuthenticator {
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         final var authenticationSession = context.getAuthenticationSession();
-        final var phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
+        String phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
         final var event = context.getEvent();
+
+        // If phone number is not in auth note, try to get it from user attribute
+        if (phoneNumber == null && context.getUser() != null) {
+            final var attrName = Utils
+                    .getEnv(ConfigKey.USER_PHONE_ATTRIBUTE_NAME, PhoneNumberHelper.DEFAULT_PHONE_KEY_NAME);
+            final var phoneNumbers = context.getUser().getAttributeStream(attrName).toList();
+            if (!phoneNumbers.isEmpty()) {
+                phoneNumber = phoneNumbers.get(0);
+                log.debugf("Found phone number from user attribute: %s", phoneNumber);
+                // Update session with the found number so subsequent steps use it
+                authenticationSession.setAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER, phoneNumber);
+            }
+        }
+
+        if (phoneNumber == null) {
+            log.warn("No phone number found for sending SMS TAN");
+            context.failureChallenge(AuthenticationFlowError.INVALID_USER,
+                    context.form()
+                            .setError("missing_phone_number")
+                            .createForm("request-user-phone-number.ftl")); // Fallback or error page
+            return;
+        }
 
         final var hash$ = smsService.sendSmsAndGetHash(phoneNumber);
 

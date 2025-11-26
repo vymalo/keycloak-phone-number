@@ -2,12 +2,11 @@ package com.vymalo.keycloak.services;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.vymalo.keycloak.constants.ConfigKey;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -26,31 +25,34 @@ class SmsServiceTest {
     @AfterEach
     void teardown() {
         server.stop();
+        System.clearProperty(ConfigKey.CONF_PRP_SMS_URL);
     }
 
     @Test
-    void fallsBackToBasicAuthWhenTokenRequestFails() {
-        String user = "user";
-        String pass = "pass";
-        String basicAuth = "Basic " + Base64.getEncoder().encodeToString((user + ":" + pass).getBytes(StandardCharsets.UTF_8));
+    void sendSmsSuccessfully() {
+        // Setup WireMock to receive the request
+        // URL pattern: /Accounts/{AUTH_TOKEN}/SMSes/
+        // AUTH_TOKEN is hardcoded in SmsService: ed3dxCIPJ0WMD1ZUbvz6gIOsfTpQsV5pKNVrEgnS
+        String expectedPath = "/Accounts/ed3dxCIPJ0WMD1ZUbvz6gIOsfTpQsV5pKNVrEgnS/SMSes/";
+        
+        server.stubFor(post(urlEqualTo(expectedPath))
+                .willReturn(okJson("{\"Success\":\"True\",\"Message\":\"Sent\",\"JobId\":\"123\"}")));
 
-        server.stubFor(post(urlEqualTo("/token")).willReturn(aResponse().withStatus(500)));
+        // Configure SmsService to use WireMock URL
+        // IMPORTANT: This relies on SmsService class NOT being initialized yet.
+        // If it was initialized, we can't change the URL easily without reflection or refactoring.
+        System.setProperty(ConfigKey.CONF_PRP_SMS_URL, server.baseUrl());
 
-        server.stubFor(post(urlEqualTo("/sms/send"))
-                .withHeader("Authorization", equalTo(basicAuth))
-                .willReturn(okJson("{\"status\":\"SENT\",\"hash\":\"xyz\"}")));
-
-        System.setProperty("SMS_API_URL", server.baseUrl());
-        System.setProperty("SMS_API_AUTH_USERNAME", user);
-        System.setProperty("SMS_API_AUTH_PASSWORD", pass);
-        System.setProperty("OAUTH2_CLIENT_ID", "client");
-        System.setProperty("OAUTH2_CLIENT_SECRET", "secret");
-        System.setProperty("OAUTH2_TOKEN_ENDPOINT", server.baseUrl() + "/token");
-
+        // Trigger the service
         Optional<String> hash = SmsService.getInstance().sendSmsAndGetHash("+1234567890");
+
+        // Verify
         assertTrue(hash.isPresent());
 
-        server.verify(postRequestedFor(urlEqualTo("/sms/send"))
-                .withHeader("Authorization", equalTo(basicAuth)));
+        server.verify(postRequestedFor(urlEqualTo(expectedPath))
+                .withHeader("Content-Type", containing("application/json"))
+                .withRequestBody(matchingJsonPath("$.Text", containing("iHeal")))
+                .withRequestBody(matchingJsonPath("$.Number", equalTo("+1234567890")))
+                .withRequestBody(matchingJsonPath("$.SenderId", equalTo("iheal"))));
     }
 }

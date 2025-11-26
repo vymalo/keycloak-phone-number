@@ -61,8 +61,13 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
             if (handlePreExistingUser(context, existingUser)) return;
         }
 
+        // Check if the user is already authenticated in the context (e.g., standard login flow)
+        if (context.getUser() != null) {
+            if (handlePreExistingUser(context, context.getUser())) return;
+        }
+
         final var challenge = context.form()
-                .setAttribute("regionPrefix", "")
+                .setAttribute("regionPrefix", "+91")
                 .setAttribute("countries", SmsService.getAllCountries())
                 .createForm("request-user-phone-number.ftl");
         context.challenge(challenge);

@@ -1,153 +1,74 @@
 openapi: 3.0.3
 info:
-  title: SMS OpenApi
-  description: |
-    Some existing API Server for sending POST message to help 
-    with authentication at [https://bayamsell.com](https://pay.bayamsell.com)
-  termsOfService: https://blog.ssegning.com
-  contact:
-    email: dev@ssegning.com
-  license:
-    name: MIT
-  version: 26.1.3
-externalDocs:
-  description: Find out more about calling setting up an external service to verify phone number
-  url: https://ssegning.com
+  title: SMS Country API
+  description: API for sending SMS via SMSCountry
+  version: 0.1.0
 servers:
-  - url: http://prism:4010
-    description: Mock server
-  - url: http://localhost:8080
-    description: Dev server
-  - url: https://sms-api-server:port
-    description: Production server
+  - url: https://restapi.smscountry.com/v0.1
 tags:
   - name: sms
-    description: All about sending an SMS
 paths:
-  /sms/send:
+  /Accounts/{authKey}/SMSes/:
     post:
       tags:
         - sms
-      summary: Send sms
-      description: Send an SMS to the phone number provided
+      summary: Send SMS
       operationId: sendSms
       security:
-        - basic_auth: []
-        - oauth2: []
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: authKey
+          schema:
+            type: string
+          required: true
+          description: The AuthKey for the account
       requestBody:
-        description: Send sms request
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/SendSmsRequest'
-        required: true
       responses:
-        200:
-          description: "successful operation"
+        '200':
+          description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SendSmsResponse"
-        401:
-          description: "Unauthorized - Invalid or missing authentication"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "unauthorized"
-                    
-  /sms/validate:
-    post:
-      tags:
-        - sms
-      summary: Validate sms
-      description: Send an SMS to the phone number provided
-      operationId: validateSms
-      security:
-        - basic_auth: []
-        - oauth2: []
-      requestBody:
-        description: Validate sms request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ConfirmTanRequest'
-        required: true
-      responses:
-        200:
-          description: "successful operation"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ConfirmTanResponse"
-        401:
-          description: "Unauthorized - Invalid or missing authentication"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "unauthorized"
-
+                $ref: '#/components/schemas/SendSmsResponse'
+        '401':
+          description: Unauthorized
 components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
   schemas:
-    ConfirmTanRequest:
-      type: object
-      properties:
-        hash:
-          type: string
-        code:
-          type: string
-        phoneNumber:
-          type: string
-      required:
-        - phoneNumber
-        - hash
-        - code
-    ConfirmTanResponse:
-      type: object
-      properties:
-        valid:
-          type: boolean
-      required:
-        - valid
     SendSmsRequest:
       type: object
       properties:
-        phoneNumber:
+        Text:
+          type: string
+        Number:
+          type: string
+        SenderId:
+          type: string
+        DRNotifyUrl:
+          type: string
+        DRNotifyHttpMethod:
+          type: string
+        Tool:
           type: string
       required:
-        - phoneNumber
-    SmsStatus:
-      type: string
-      enum:
-        - SENT
-        - ERROR
-        - PENDING
+        - Text
+        - Number
+        - SenderId
     SendSmsResponse:
       type: object
       properties:
-        status:
-          $ref: '#/components/schemas/SmsStatus'
-        description:
+        Success:
           type: string
-          maxLength: 200
-        hash:
+        Message:
           type: string
-      required:
-        - status
-  securitySchemes:
-    basic_auth:
-      type: http
-      scheme: basic
-    oauth2:
-      type: oauth2
-      flows:
-        clientCredentials:
-          tokenUrl: 'http://token-mock:8080/token'
-          scopes: {}
+        JobId:
+          type: string
