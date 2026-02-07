@@ -17,7 +17,6 @@ x-keycloak-common-extra: &keycloak-common-extra
     - |
       set -ex
       cp /tmp/libs-authenticator/keycloak-*.jar /opt/keycloak/providers
-      cp /tmp/libs-console/keycloak-*.jar /opt/keycloak/providers
       cp /tmp/libs-api/keycloak-*.jar /opt/keycloak/providers
       #cp /tmp/libs-sns-sqs/keycloak-*.jar /opt/keycloak/providers || true
       #cp /tmp/libs-rabbitmq/keycloak-*.jar /opt/keycloak/providers || true
@@ -28,7 +27,6 @@ x-keycloak-common-extra: &keycloak-common-extra
   volumes:
     - ./.docker/keycloak-config/:/opt/keycloak/data/import/:ro
     - ./packages/authenticator/target/:/tmp/libs-authenticator:ro
-    - ./packages/console/target/:/tmp/libs-console:ro
     - ./packages/api/target/:/tmp/libs-api:ro
     - ./packages/sns-sqs/target/:/tmp/libs-sns-sqs:ro
     - ./packages/rabbitmq/target/:/tmp/libs-rabbitmq:ro
@@ -43,7 +41,7 @@ services:
   keycloak-22:
     image: quay.io/keycloak/keycloak:22.0.5
     ports:
-      - "9022:9022"
+      - "127.0.0.1:9022:9022"
     depends_on:
       token-mock:
         condition: service_healthy
@@ -54,7 +52,7 @@ services:
   keycloak-23:
     image: quay.io/keycloak/keycloak:23.0.7
     ports:
-      - "9023:9023"
+      - "127.0.0.1:9023:9023"
     depends_on:
       token-mock:
         condition: service_healthy
@@ -65,7 +63,7 @@ services:
   keycloak-24:
     image: quay.io/keycloak/keycloak:24.0.5
     ports:
-      - "9024:9024"
+      - "127.0.0.1:9024:9024"
     depends_on:
       token-mock:
         condition: service_healthy
@@ -77,7 +75,7 @@ services:
   keycloak-25:
     image: quay.io/keycloak/keycloak:25.0.6
     ports:
-      - "9025:9025"
+      - "127.0.0.1:9025:9025"
     depends_on:
       token-mock:
         condition: service_healthy

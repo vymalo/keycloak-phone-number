@@ -14,7 +14,7 @@ jobs:
         uses: s4u/setup-maven-action@v1.19.0
         with:
           java-version: 21
-          maven-version: 3.9.9
+          maven-version: 3.9.12
       - name: Build jar
         run: mvn clean package
       - name: Archive Artifacts
@@ -30,7 +30,6 @@ jobs:
             packages/kafka/target/keycloak-phonenumber-kafka-*.jar
             packages/authenticator/target/keycloak-phonenumber-login-*.jar
             packages/theme/target/keycloak-phonenumber-theme-*.jar
-            packages/console/target/keycloak-phonenumber-console-*.jar
 
   release:
     needs: build

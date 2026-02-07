@@ -174,7 +174,6 @@ The plugin is built as a monorepo under `packages/`:
 - **`packages/amqp`**: AMQP provider module scaffold.
 - **`packages/kafka`**: Kafka provider module scaffold.
 - **`packages/theme`**: login theme package.
-- **`packages/console`**: console utility for manual provider testing.
 
 Dependency injection (via CDI) is used to wire components together, making the system more modular, testable, and
 maintainable.

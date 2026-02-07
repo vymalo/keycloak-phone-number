@@ -28,7 +28,6 @@
         <module>packages/kafka</module>
         <module>packages/authenticator</module>
         <module>packages/theme</module>
-        <module>packages/console</module>
     </modules>
 
     <dependencyManagement>
