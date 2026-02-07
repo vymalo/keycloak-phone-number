@@ -16,11 +16,13 @@ x-keycloak-common-extra: &keycloak-common-extra
     - -c
     - |
       set -ex
-      cp /tmp/libs-*/keycloak-*.jar /opt/keycloak/providers
+      cp /tmp/libs-authenticator/keycloak-*.jar /opt/keycloak/providers
+      cp /tmp/libs-theme/keycloak-*.jar /opt/keycloak/providers
       /opt/keycloak/bin/kc.sh start-dev --import-realm
   volumes:
     - ./.docker/keycloak-config/:/opt/keycloak/data/import/:ro
-    - ./target/:/tmp/libs-target:ro
+    - ./packages/authenticator/target/:/tmp/libs-authenticator:ro
+    - ./packages/theme/target/:/tmp/libs-theme:ro
   links:
     - prism
     - token-mock
@@ -73,7 +75,7 @@ services:
     <<: *keycloak-common-extra
 
   keycloak-26:
-    image: quay.io/keycloak/keycloak:26.1.3
+    image: quay.io/keycloak/keycloak:26.5.2
     ports:
       - "9026:9026"
     depends_on:

@@ -21,8 +21,8 @@ authenticate using their phone number. The process includes:
 
 - **Phone Number Entry:** Users enter their phone number.
 - **Confirmation:** The system displays a formatted version of the number for user confirmation.
-- **User Lookup/Creation:** The plugin checks if the user exists (creating one if not).
-- **SMS TAN Sending:** A Transaction Authentication Number (TAN) is generated and sent via an external SMS API.
+- **User Lookup/Creation:** The plugin resolves a user by phone number (and creates one after phone verification if needed).
+- **SMS TAN Sending:** A TAN is requested and sent via an external SMS API.
 - **TAN Validation:** The user inputs the TAN to complete authentication.
 - **Profile Update:** On successful TAN verification, users can update their profile information.
 
@@ -37,10 +37,11 @@ The `SmsService` has been enhanced to support both **Basic Authentication** and 
 
 ### Downloading the Plugin
 
-You can download the latest plugin JAR from the GitHub artifacts using a `curl` command. For example:
+You can download the latest plugin JARs from GitHub releases using `curl`. For example:
 
 ```bash
 curl -L -o keycloak-phonenumber-login.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-login-<version>.jar
+curl -L -o keycloak-phonenumber-theme.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-theme-<version>.jar
 ```
 
 ### Mounting into Keycloak
@@ -64,7 +65,8 @@ docker run -d \
   -e OAUTH2_CLIENT_SECRET=some-client-secret \
   -e OAUTH2_TOKEN_ENDPOINT=http://token-mock:8080/token \
   -v /path/to/keycloak-phonenumber-login.jar:/opt/keycloak/providers/keycloak-phonenumber-login.jar \
-  quay.io/keycloak/keycloak:26.1.2 start-dev
+  -v /path/to/keycloak-phonenumber-theme.jar:/opt/keycloak/providers/keycloak-phonenumber-theme.jar \
+  quay.io/keycloak/keycloak:26.5.2 start-dev
 ```
 
 #### Kubernetes Example
@@ -92,18 +94,19 @@ spec:
           image: curlimages/curl:8.1.2
           env:
             - name: VERSION
-              value: 26.1.3
+              value: 26.5.2
           command:
             - sh
             - -c
             - |
               curl -L -o /plugin/keycloak-phonenumber-login.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v$VERSION/keycloak-phonenumber-login-$VERSION.jar
+              curl -L -o /plugin/keycloak-phonenumber-theme.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v$VERSION/keycloak-phonenumber-theme-$VERSION.jar
           volumeMounts:
             - name: plugin-volume
               mountPath: /plugin
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:26.1.2
+          image: quay.io/keycloak/keycloak:26.5.2
           ports:
             - containerPort: 8080
           env:

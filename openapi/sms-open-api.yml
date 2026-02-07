@@ -9,7 +9,8 @@ info:
     email: dev@ssegning.com
   license:
     name: MIT
-  version: 26.1.3
+    identifier: MIT
+  version: 26.5.2
 externalDocs:
   description: Find out more about calling setting up an external service to verify phone number
   url: https://ssegning.com
@@ -96,6 +97,10 @@ paths:
 
 components:
   schemas:
+    Metadata:
+      type: object
+      description: Optional, extra context passed by the Keycloak plugin.
+      additionalProperties: true
     ConfirmTanRequest:
       type: object
       properties:
@@ -105,6 +110,20 @@ components:
           type: string
         phoneNumber:
           type: string
+        realm:
+          type: string
+        clientId:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        sessionId:
+          type: string
+        traceId:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
       required:
         - phoneNumber
         - hash
@@ -121,6 +140,20 @@ components:
       properties:
         phoneNumber:
           type: string
+        realm:
+          type: string
+        clientId:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        sessionId:
+          type: string
+        traceId:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Metadata'
       required:
         - phoneNumber
     SmsStatus:

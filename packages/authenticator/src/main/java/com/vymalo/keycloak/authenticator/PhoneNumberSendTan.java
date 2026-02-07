@@ -22,12 +22,14 @@ public class PhoneNumberSendTan extends AbstractPhoneNumberAuthenticator {
         final var phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
         final var event = context.getEvent();
 
-        final var hash$ = smsService.sendSmsAndGetHash(phoneNumber);
+        final var hash$ = smsService(context).sendSmsAndGetHash(
+                smsRequestContext(context, "send_tan"),
+                phoneNumber
+        );
 
         if (hash$.isPresent()) {
             final var hash = hash$.get();
-            event.detail("sms_hash", hash)
-                 .success();
+            event.success();
 
             context
                     .getAuthenticationSession()
@@ -55,7 +57,7 @@ public class PhoneNumberSendTan extends AbstractPhoneNumberAuthenticator {
 
     @Override
     public boolean requiresUser() {
-        return true;
+        return false;
     }
 
     @Override

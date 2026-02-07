@@ -1,6 +1,7 @@
 package com.vymalo.keycloak.authenticator;
 
 import com.vymalo.keycloak.constants.PhoneKey;
+import com.vymalo.keycloak.services.PhoneNumberService;
 import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
@@ -27,7 +28,7 @@ public class PhoneNumberConfirmNumber extends AbstractPhoneNumberAuthenticator {
 
         final var authenticationSession = context.getAuthenticationSession();
         final var phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
-        final var internationalized$ = smsService.format(phoneNumber);
+        final var internationalized$ = PhoneNumberService.formatE164(phoneNumber);
 
         final var challenge = context
                 .form()

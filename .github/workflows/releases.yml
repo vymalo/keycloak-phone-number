@@ -20,8 +20,10 @@ jobs:
       - name: Archive Artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: target-keycloak-phonenumber-login
-          path: target/keycloak-phonenumber-login-*.jar
+          name: keycloak-phone-number-jars
+          path: |
+            packages/authenticator/target/keycloak-phonenumber-login-*.jar
+            packages/theme/target/keycloak-phonenumber-theme-*.jar
 
   release:
     needs: build
@@ -29,26 +31,35 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.19.0
+        with:
+          java-version: 17
+          maven-version: 3.9.9
       - name: Download Build Artifacts
         uses: actions/download-artifact@v7
         with:
-          name: target-keycloak-phonenumber-login
+          name: keycloak-phone-number-jars
+          path: dist
 
       # Upload as an artifact of the current workflow
       - name: Upload build zip artifact
         uses: actions/upload-artifact@v6
         with:
           name: Release artifacts
-          path: '*.jar'
+          path: dist/*.jar
 
       # Make official GitHub release which will trigger
       # sending the mail with link for access
+      - name: Get version
+        id: version
+        run: echo "version=$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)" >> "$GITHUB_OUTPUT"
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: '*.jar'
+          artifacts: dist/*.jar
           draft: false
           prerelease: false
           allowUpdates: true
           bodyFile: CHANGELOG.md
-          tag: v26.1.3
+          tag: v${{ steps.version.outputs.version }}

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -40,14 +41,20 @@ class SmsServiceTest {
                 .withHeader("Authorization", equalTo(basicAuth))
                 .willReturn(okJson("{\"status\":\"SENT\",\"hash\":\"xyz\"}")));
 
-        System.setProperty("SMS_API_URL", server.baseUrl());
-        System.setProperty("SMS_API_AUTH_USERNAME", user);
-        System.setProperty("SMS_API_AUTH_PASSWORD", pass);
-        System.setProperty("OAUTH2_CLIENT_ID", "client");
-        System.setProperty("OAUTH2_CLIENT_SECRET", "secret");
-        System.setProperty("OAUTH2_TOKEN_ENDPOINT", server.baseUrl() + "/token");
+        SmsService service = new SmsService(new SmsServiceConfig(
+                server.baseUrl(),
+                SmsServiceConfig.SmsAuthMode.AUTO,
+                server.baseUrl() + "/token",
+                user,
+                pass,
+                "client",
+                "secret"
+        ));
 
-        Optional<String> hash = SmsService.getInstance().sendSmsAndGetHash("+1234567890");
+        Optional<String> hash = service.sendSmsAndGetHash(
+                new SmsRequestContext("test-realm", "test-client", "127.0.0.1", "test-agent", "test-session", "test-trace", Map.of()),
+                "+1234567890"
+        );
         assertTrue(hash.isPresent());
 
         server.verify(postRequestedFor(urlEqualTo("/sms/send"))

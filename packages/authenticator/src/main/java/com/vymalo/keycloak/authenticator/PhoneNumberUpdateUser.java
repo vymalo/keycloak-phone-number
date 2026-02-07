@@ -7,10 +7,6 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.provider.ProviderConfigProperty;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @JBossLog
 @NoArgsConstructor
@@ -23,7 +19,6 @@ public class PhoneNumberUpdateUser extends AbstractPhoneNumberAuthenticator {
             AuthenticationExecutionModel.Requirement.ALTERNATIVE,
             AuthenticationExecutionModel.Requirement.DISABLED
     };
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -74,11 +69,6 @@ public class PhoneNumberUpdateUser extends AbstractPhoneNumberAuthenticator {
     @Override
     public String getHelpText() {
         return "Update user's information after login by phone number";
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
     }
 
     @Override

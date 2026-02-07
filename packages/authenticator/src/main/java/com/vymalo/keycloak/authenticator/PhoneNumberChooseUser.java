@@ -1,9 +1,6 @@
 package com.vymalo.keycloak.authenticator;
 
-import com.vymalo.keycloak.constants.ConfigKey;
 import com.vymalo.keycloak.constants.PhoneKey;
-import com.vymalo.keycloak.constants.PhoneNumberHelper;
-import com.vymalo.keycloak.constants.Utils;
 import lombok.NoArgsConstructor;
 import lombok.extern.jbosslog.JBossLog;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -29,8 +26,7 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
         final var phoneNumber = authenticationSession.getAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER);
 
         final var realm = context.getRealm();
-        final var attrName = Utils
-                .getEnv(ConfigKey.USER_PHONE_ATTRIBUTE_NAME, PhoneNumberHelper.DEFAULT_PHONE_KEY_NAME);
+        final var attrName = phoneAttributeName(context);
 
         var user = context.getUser();
 
@@ -43,25 +39,28 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
             return;
         }
 
-        if (user != null && user.isEnabled()) {
-            user.setAttribute(attrName, Collections.singletonList(phoneNumber));
-        } else {
+        if (user == null) {
             UserProvider userProvider = context.getSession().users();
             final var users = userProvider
                     .searchForUserByUserAttributeStream(realm, attrName, phoneNumber)
                     .toList();
 
-            if (users.isEmpty() && user == null) {
-                final var newUser = userProvider.addUser(realm, phoneNumber);
-                newUser.setAttribute(attrName, Collections.singletonList(phoneNumber));
-                newUser.setEnabled(true);
-                user = newUser;
-            } else {
+            if (users.size() > 1) {
+                log.warnf("Multiple users match %s=%s; using the first match", attrName, phoneNumber);
+            }
+
+            if (!users.isEmpty()) {
                 user = users.get(0);
             }
         }
 
-        context.setUser(user);
+        if (user != null && user.isEnabled()) {
+            user.setAttribute(attrName, Collections.singletonList(phoneNumber));
+            context.setUser(user);
+        } else {
+            context.clearUser();
+        }
+
         context
                 .getAuthenticationSession()
                 .setAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER, phoneNumber);
@@ -86,7 +85,7 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
 
     @Override
     public String getHelpText() {
-        return "Choose a user, by his/her phone number, to reset credentials for";
+        return "Resolve a user by phone number (without creating a user before phone verification)";
     }
 
     @Override
