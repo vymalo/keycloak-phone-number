@@ -20,14 +20,14 @@
     </properties>
 
     <modules>
-        <module>packages/abstractions</module>
-        <module>packages/api</module>
-        <module>packages/sns-sqs</module>
-        <module>packages/rabbitmq</module>
-        <module>packages/amqp</module>
-        <module>packages/kafka</module>
-        <module>packages/authenticator</module>
-        <module>packages/theme</module>
+        <module>packages/keycloak-phonenumber-abstractions</module>
+        <module>packages/keycloak-phonenumber-api</module>
+        <module>packages/keycloak-phonenumber-sns-sqs</module>
+        <module>packages/keycloak-phonenumber-rabbitmq</module>
+        <module>packages/keycloak-phonenumber-amqp</module>
+        <module>packages/keycloak-phonenumber-kafka</module>
+        <module>packages/keycloak-phonenumber-login</module>
+        <module>packages/keycloak-phonenumber-theme</module>
     </modules>
 
     <dependencyManagement>

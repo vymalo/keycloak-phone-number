@@ -42,6 +42,16 @@ public abstract class AbstractPhoneNumberAuthenticator implements
     private static final Map<String, String> infos = new HashMap<>();
     private static final Map<String, SmsGatewayFactory> gatewayFactories = new ConcurrentHashMap<>();
 
+    private static List<String> discoverSmsProviderOptions() {
+        return ServiceLoader.load(SmsGatewayFactory.class).stream()
+                .map(ServiceLoader.Provider::get)
+                .map(SmsGatewayFactory::type)
+                .map(String::toUpperCase)
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
     static {
         infos.put("version", "26.5.2");
         infos.put("repo", "https://github.com/vymalo/keycloak-phone-number");
@@ -55,8 +65,8 @@ public abstract class AbstractPhoneNumberAuthenticator implements
         provider.setLabel("SMS Provider");
         provider.setHelpText("How TAN messages are dispatched.");
         provider.setType(ProviderConfigProperty.LIST_TYPE);
-        provider.setOptions(List.of("API", "SNS_SQS", "RABBITMQ", "AMQP", "KAFKA"));
-        provider.setDefaultValue("API");
+        provider.setOptions(discoverSmsProviderOptions());
+        provider.setDefaultValue(provider.getOptions().contains("API") ? "API" : provider.getOptions().get(0));
         configProperties.add(provider);
 
         ProviderConfigProperty authMode = new ProviderConfigProperty();
