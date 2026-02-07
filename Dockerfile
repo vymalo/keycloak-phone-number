@@ -13,6 +13,7 @@ USER 0
 RUN mkdir $JBOSS_HOME/providers
 
 RUN curl -H "Accept: application/zip" https://github.com/vymalo/keycloak-phonenumber-login/releases/download/v${PHONENUMBER_LOGIN_PLUGIN_VERSION}/keycloak-phonenumber-login-${PHONENUMBER_LOGIN_PLUGIN_VERSION}.jar -o $JBOSS_HOME/providers/keycloak-phonenumber-login-${PHONENUMBER_LOGIN_PLUGIN_VERSION}.jar -Li
+RUN curl -H "Accept: application/zip" https://github.com/vymalo/keycloak-phonenumber-login/releases/download/v${PHONENUMBER_LOGIN_PLUGIN_VERSION}/keycloak-phonenumber-api-${PHONENUMBER_LOGIN_PLUGIN_VERSION}.jar -o $JBOSS_HOME/providers/keycloak-phonenumber-api-${PHONENUMBER_LOGIN_PLUGIN_VERSION}.jar -Li
 RUN curl -H "Accept: application/zip" https://github.com/vymalo/keycloak-phonenumber-login/releases/download/v${PHONENUMBER_LOGIN_PLUGIN_VERSION}/keycloak-phonenumber-theme-${PHONENUMBER_LOGIN_PLUGIN_VERSION}.jar -o $JBOSS_HOME/providers/keycloak-phonenumber-theme-${PHONENUMBER_LOGIN_PLUGIN_VERSION}.jar -Li
 
 RUN $KEYCLOAK_DIR/bin/kc.sh build

@@ -13,10 +13,10 @@
                         value="${(regionPrefix)!""}"
                         class="${properties.kcInputClass!}">
                     <#list countries as l>
-                        <#if (((regionPrefix)!"") == l.code)>
-                            <option selected value="${l.code}">${l.label}</option>
+                        <#if (((regionPrefix)!"") == l.code())>
+                            <option selected value="${l.code()}">${l.label()}</option>
                         <#else>
-                            <option value="${l.code}">${l.label}</option>
+                            <option value="${l.code()}">${l.label()}</option>
                         </#if>
                     </#list>
                 </select>

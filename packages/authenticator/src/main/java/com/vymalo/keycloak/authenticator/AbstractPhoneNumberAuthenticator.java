@@ -2,8 +2,9 @@ package com.vymalo.keycloak.authenticator;
 
 import com.vymalo.keycloak.constants.ConfigKey;
 import com.vymalo.keycloak.constants.PhoneNumberHelper;
+import com.vymalo.keycloak.services.SmsGateway;
+import com.vymalo.keycloak.services.SmsGatewayFactory;
 import com.vymalo.keycloak.services.SmsRequestContext;
-import com.vymalo.keycloak.services.SmsService;
 import com.vymalo.keycloak.services.SmsServiceConfig;
 import org.keycloak.Config;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -20,7 +21,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractPhoneNumberAuthenticator implements
         Authenticator,
@@ -37,6 +40,7 @@ public abstract class AbstractPhoneNumberAuthenticator implements
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     private static final Map<String, String> infos = new HashMap<>();
+    private static final Map<String, SmsGatewayFactory> gatewayFactories = new ConcurrentHashMap<>();
 
     static {
         infos.put("version", "26.5.2");
@@ -49,10 +53,10 @@ public abstract class AbstractPhoneNumberAuthenticator implements
         ProviderConfigProperty provider = new ProviderConfigProperty();
         provider.setName(CFG_SMS_PROVIDER);
         provider.setLabel("SMS Provider");
-        provider.setHelpText("How TAN messages are dispatched. OPENAPI is implemented; QUEUE and TWILIO are placeholders for now.");
+        provider.setHelpText("How TAN messages are dispatched.");
         provider.setType(ProviderConfigProperty.LIST_TYPE);
-        provider.setOptions(List.of("OPENAPI", "QUEUE", "TWILIO"));
-        provider.setDefaultValue("OPENAPI");
+        provider.setOptions(List.of("API", "SNS_SQS", "RABBITMQ", "AMQP", "KAFKA"));
+        provider.setDefaultValue("API");
         configProperties.add(provider);
 
         ProviderConfigProperty authMode = new ProviderConfigProperty();
@@ -94,11 +98,8 @@ public abstract class AbstractPhoneNumberAuthenticator implements
         );
     }
 
-    protected final SmsService smsService(AuthenticationFlowContext context) {
-        final String provider = AuthenticatorConfigResolver.getConfig(context, CFG_SMS_PROVIDER).orElse("OPENAPI").trim().toUpperCase();
-        if (!"OPENAPI".equals(provider)) {
-            throw new IllegalStateException("smsProvider=" + provider + " is not implemented yet. Use OPENAPI for now.");
-        }
+    protected final SmsGateway smsService(AuthenticationFlowContext context) {
+        final String provider = AuthenticatorConfigResolver.getConfig(context, CFG_SMS_PROVIDER).orElse("API").trim().toUpperCase();
 
         final String smsApiUrl = AuthenticatorConfigResolver.getConfigOrEnv(
                 context,
@@ -147,7 +148,25 @@ public abstract class AbstractPhoneNumberAuthenticator implements
                 clientSecret
         );
 
-        return new SmsService(cfg);
+        return resolveGatewayFactory(provider).create(cfg);
+    }
+
+    private static SmsGatewayFactory resolveGatewayFactory(String provider) {
+        SmsGatewayFactory cached = gatewayFactories.get(provider);
+        if (cached != null) {
+            return cached;
+        }
+
+        for (SmsGatewayFactory factory : ServiceLoader.load(SmsGatewayFactory.class)) {
+            String type = factory.type().toUpperCase();
+            gatewayFactories.putIfAbsent(type, factory);
+        }
+
+        SmsGatewayFactory resolved = gatewayFactories.get(provider);
+        if (resolved == null) {
+            throw new IllegalStateException("No SmsGatewayFactory found for provider: " + provider);
+        }
+        return resolved;
     }
 
     protected final SmsRequestContext smsRequestContext(AuthenticationFlowContext context, String step) {

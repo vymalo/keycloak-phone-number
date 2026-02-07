@@ -41,6 +41,7 @@ You can download the latest plugin JARs from GitHub releases using `curl`. For e
 
 ```bash
 curl -L -o keycloak-phonenumber-login.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-login-<version>.jar
+curl -L -o keycloak-phonenumber-api.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-api-<version>.jar
 curl -L -o keycloak-phonenumber-theme.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-theme-<version>.jar
 ```
 
@@ -65,6 +66,7 @@ docker run -d \
   -e OAUTH2_CLIENT_SECRET=some-client-secret \
   -e OAUTH2_TOKEN_ENDPOINT=http://token-mock:8080/token \
   -v /path/to/keycloak-phonenumber-login.jar:/opt/keycloak/providers/keycloak-phonenumber-login.jar \
+  -v /path/to/keycloak-phonenumber-api.jar:/opt/keycloak/providers/keycloak-phonenumber-api.jar \
   -v /path/to/keycloak-phonenumber-theme.jar:/opt/keycloak/providers/keycloak-phonenumber-theme.jar \
   quay.io/keycloak/keycloak:26.5.2 start-dev
 ```
@@ -100,6 +102,7 @@ spec:
             - -c
             - |
               curl -L -o /plugin/keycloak-phonenumber-login.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v$VERSION/keycloak-phonenumber-login-$VERSION.jar
+              curl -L -o /plugin/keycloak-phonenumber-api.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v$VERSION/keycloak-phonenumber-api-$VERSION.jar
               curl -L -o /plugin/keycloak-phonenumber-theme.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v$VERSION/keycloak-phonenumber-theme-$VERSION.jar
           volumeMounts:
             - name: plugin-volume
@@ -161,28 +164,17 @@ Configure these variables in your deployment (Docker, Kubernetes, etc.) as shown
 
 ## 4. Architecture
 
-The plugin is built using a multi-module Maven structure with the following layers:
+The plugin is built as a monorepo under `packages/`:
 
-- **Core Module:**  
-  Contains shared constants, utilities, and models (e.g., phone number helpers, country codes).
-
-- **Authenticator Module:**  
-  Implements custom Keycloak authenticators that control the multi-step authentication flow:
-    - **PhoneNumberGetNumber:** Collects user phone numbers.
-    - **PhoneNumberConfirmNumber:** Displays the confirmed phone number.
-    - **PhoneNumberChooseUser:** Looks up or creates users based on phone number.
-    - **PhoneNumberSendTan:** Sends a TAN via an SMS service.
-    - **PhoneNumberValidateTan:** Validates the TAN entered by the user.
-    - **PhoneNumberUpdateUser:** Prompts users to update their profile post-authentication.
-
-- **Service Module:**  
-  Encapsulates business logic for phone number processing and SMS operations:
-    - **PhoneNumberService:** Validates and formats phone numbers.
-    - **SmsService:** Handles interactions with the external SMS API (using an OpenAPI-generated client).
-
-- **OpenAPI Client Module:**  
-  Contains the generated client code for the SMS API integration, ensuring a robust and type-safe communication with the
-  external service.
+- **`packages/abstractions`**: shared interfaces and models used by all providers.
+- **`packages/authenticator`**: Keycloak authenticator flow implementation.
+- **`packages/api`**: OpenAPI-based SMS provider implementation.
+- **`packages/sns-sqs`**: SNS/SQS provider module scaffold.
+- **`packages/rabbitmq`**: RabbitMQ provider module scaffold.
+- **`packages/amqp`**: AMQP provider module scaffold.
+- **`packages/kafka`**: Kafka provider module scaffold.
+- **`packages/theme`**: login theme package.
+- **`packages/console`**: console utility for manual provider testing.
 
 Dependency injection (via CDI) is used to wire components together, making the system more modular, testable, and
 maintainable.

@@ -3,11 +3,9 @@ package com.vymalo.keycloak.services;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
-import lombok.extern.jbosslog.JBossLog;
 
 import java.util.Optional;
 
-@JBossLog
 public final class PhoneNumberService {
     private static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
 
@@ -18,7 +16,6 @@ public final class PhoneNumberService {
         try {
             return Optional.ofNullable(PHONE_NUMBER_UTIL.parse(phoneNumber, null));
         } catch (NumberParseException err) {
-            log.warn(err);
             return Optional.empty();
         }
     }
@@ -27,4 +24,3 @@ public final class PhoneNumberService {
         return parse(phoneNumber).map(parsed -> PHONE_NUMBER_UTIL.format(parsed, PhoneNumberUtil.PhoneNumberFormat.E164));
     }
 }
-

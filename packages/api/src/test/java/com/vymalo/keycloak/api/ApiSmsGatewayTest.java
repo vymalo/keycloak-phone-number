@@ -1,7 +1,9 @@
-package com.vymalo.keycloak.services;
+package com.vymalo.keycloak.api;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.vymalo.keycloak.services.SmsRequestContext;
+import com.vymalo.keycloak.services.SmsServiceConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,10 +13,15 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class SmsServiceTest {
+class ApiSmsGatewayTest {
 
     private WireMockServer server;
 
@@ -41,7 +48,7 @@ class SmsServiceTest {
                 .withHeader("Authorization", equalTo(basicAuth))
                 .willReturn(okJson("{\"status\":\"SENT\",\"hash\":\"xyz\"}")));
 
-        SmsService service = new SmsService(new SmsServiceConfig(
+        ApiSmsGateway gateway = new ApiSmsGateway(new SmsServiceConfig(
                 server.baseUrl(),
                 SmsServiceConfig.SmsAuthMode.AUTO,
                 server.baseUrl() + "/token",
@@ -51,7 +58,7 @@ class SmsServiceTest {
                 "secret"
         ));
 
-        Optional<String> hash = service.sendSmsAndGetHash(
+        Optional<String> hash = gateway.sendSmsAndGetHash(
                 new SmsRequestContext("test-realm", "test-client", "127.0.0.1", "test-agent", "test-session", "test-trace", Map.of()),
                 "+1234567890"
         );

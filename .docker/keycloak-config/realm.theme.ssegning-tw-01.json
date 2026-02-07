@@ -10,6 +10,7 @@
   "resetPasswordAllowed": true,
   "enabled": true,
   "internationalizationEnabled": true,
+  "sslRequired": "none",
   "supportedLocales": [
     "de",
     "en",

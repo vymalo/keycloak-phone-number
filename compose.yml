@@ -17,11 +17,23 @@ x-keycloak-common-extra: &keycloak-common-extra
     - |
       set -ex
       cp /tmp/libs-authenticator/keycloak-*.jar /opt/keycloak/providers
+      cp /tmp/libs-console/keycloak-*.jar /opt/keycloak/providers
+      cp /tmp/libs-api/keycloak-*.jar /opt/keycloak/providers
+      #cp /tmp/libs-sns-sqs/keycloak-*.jar /opt/keycloak/providers || true
+      #cp /tmp/libs-rabbitmq/keycloak-*.jar /opt/keycloak/providers || true
+      #cp /tmp/libs-amqp/keycloak-*.jar /opt/keycloak/providers || true
+      #cp /tmp/libs-kafka/keycloak-*.jar /opt/keycloak/providers || true
       cp /tmp/libs-theme/keycloak-*.jar /opt/keycloak/providers
       /opt/keycloak/bin/kc.sh start-dev --import-realm
   volumes:
     - ./.docker/keycloak-config/:/opt/keycloak/data/import/:ro
     - ./packages/authenticator/target/:/tmp/libs-authenticator:ro
+    - ./packages/console/target/:/tmp/libs-console:ro
+    - ./packages/api/target/:/tmp/libs-api:ro
+    #- ./packages/sns-sqs/target/:/tmp/libs-sns-sqs:ro
+    #- ./packages/rabbitmq/target/:/tmp/libs-rabbitmq:ro
+    #- ./packages/amqp/target/:/tmp/libs-amqp:ro
+    #- ./packages/kafka/target/:/tmp/libs-kafka:ro
     - ./packages/theme/target/:/tmp/libs-theme:ro
   links:
     - prism

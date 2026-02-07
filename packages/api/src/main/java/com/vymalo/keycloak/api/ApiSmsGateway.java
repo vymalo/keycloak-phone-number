@@ -1,14 +1,14 @@
-package com.vymalo.keycloak.services;
+package com.vymalo.keycloak.api;
 
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vymalo.api.server.handler.ApiClient;
 import com.vymalo.api.server.handler.ApiException;
 import com.vymalo.api.server.handler.SmsApi;
 import com.vymalo.api.server.model.ConfirmTanRequest;
 import com.vymalo.api.server.model.SendSmsRequest;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.jbosslog.JBossLog;
+import com.vymalo.keycloak.services.SmsGateway;
+import com.vymalo.keycloak.services.SmsRequestContext;
+import com.vymalo.keycloak.services.SmsServiceConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -18,31 +18,33 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.keycloak.util.JsonSerialization;
 
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@JBossLog
-public final class SmsService {
-    private static final PhoneNumberUtil PHONE_NUMBER_UTIL = PhoneNumberUtil.getInstance();
-
+public final class ApiSmsGateway implements SmsGateway {
+    private static final Logger LOGGER = Logger.getLogger(ApiSmsGateway.class.getName());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Map<String, TokenCacheEntry> TOKEN_CACHE = new ConcurrentHashMap<>();
-    private static final Map<String, Set<CountryPhoneCode>> COUNTRIES_CACHE = new ConcurrentHashMap<>();
 
     private final SmsApi smsApi;
-    private final SmsServiceConfig config;
 
-    public SmsService(SmsServiceConfig config) {
-        this.config = Objects.requireNonNull(config, "config");
+    public ApiSmsGateway(SmsServiceConfig c) {
+        final var config = Objects.requireNonNull(c, "config");
 
         final var apiClient = new ApiClient();
         apiClient.updateBaseUri(config.smsApiUrl());
@@ -51,6 +53,7 @@ public final class SmsService {
         this.smsApi = new SmsApi(apiClient);
     }
 
+    @Override
     public Optional<String> sendSmsAndGetHash(SmsRequestContext requestContext, String phoneNumber) {
         final var request = new SendSmsRequest()
                 .phoneNumber(phoneNumber)
@@ -65,11 +68,12 @@ public final class SmsService {
         try {
             return Optional.ofNullable(smsApi.sendSms(request).getHash());
         } catch (ApiException e) {
-            log.error("Failed to send SMS", e);
+            LOGGER.log(Level.SEVERE, "Failed to send SMS", e);
             return Optional.empty();
         }
     }
 
+    @Override
     public Optional<Boolean> confirmSmsCode(SmsRequestContext requestContext, String phoneNumber, String code, String hash) {
         final var request = new ConfirmTanRequest()
                 .code(code)
@@ -86,44 +90,8 @@ public final class SmsService {
         try {
             return Optional.ofNullable(smsApi.validateSms(request).getValid());
         } catch (ApiException e) {
-            log.error("Failed to validate SMS code", e);
+            LOGGER.log(Level.SEVERE, "Failed to validate SMS code", e);
             return Optional.empty();
-        }
-    }
-
-    public static Set<CountryPhoneCode> getAllCountries(String allowedCountryPattern) {
-        final String cacheKey = StringUtils.defaultString(allowedCountryPattern, "");
-        return COUNTRIES_CACHE.computeIfAbsent(cacheKey, key -> computeCountries(allowedCountryPattern));
-    }
-
-    private static Set<CountryPhoneCode> computeCountries(String allowedCountryPattern) {
-        final var allowedCountries = compileCountryPredicate(allowedCountryPattern);
-
-        return PHONE_NUMBER_UTIL.getSupportedCallingCodes()
-                .stream()
-                .map(supportedCallingCode -> {
-                    final var countryCode = PHONE_NUMBER_UTIL.getRegionCodeForCountryCode(supportedCallingCode);
-                    final var locale = new Locale("", countryCode);
-                    final var countryName = locale.getDisplayCountry();
-
-                    if (!allowedCountries.test(countryCode)) {
-                        return null;
-                    }
-
-                    return new CountryPhoneCode(countryName, "+" + supportedCallingCode);
-                })
-                .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(o -> o.label))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    private static java.util.function.Predicate<String> compileCountryPredicate(String allowedCountryPattern) {
-        final String pattern = StringUtils.defaultIfBlank(allowedCountryPattern, ".*");
-        try {
-            return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).asMatchPredicate();
-        } catch (Exception e) {
-            log.warnf("Invalid allowed country pattern '%s'; allowing all countries", pattern);
-            return Pattern.compile(".*").asMatchPredicate();
         }
     }
 
@@ -153,13 +121,12 @@ public final class SmsService {
             return;
         }
 
-        // AUTO
         if (StringUtils.isNotEmpty(tokenEndpoint) && StringUtils.isNotEmpty(clientId) && StringUtils.isNotEmpty(clientSecret)) {
             try {
                 setOAuth2(builder, clientId, clientSecret, tokenEndpoint);
                 return;
             } catch (Exception e) {
-                log.warn("Failed to set OAuth2 token, falling back to basic auth", e);
+                LOGGER.log(Level.WARNING, "Failed to set OAuth2 token, falling back to basic auth", e);
             }
         }
 
@@ -192,9 +159,7 @@ public final class SmsService {
             return cached.accessToken;
         }
 
-        try (CloseableHttpClient client = HttpClients.custom()
-                .setConnectionTimeToLive(30, TimeUnit.SECONDS)
-                .build()) {
+        try (CloseableHttpClient client = HttpClients.custom().setConnectionTimeToLive(30, TimeUnit.SECONDS).build()) {
             HttpPost post = new HttpPost(tokenEndpoint);
             post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -215,7 +180,7 @@ public final class SmsService {
                     throw new IOException("Token endpoint returned empty body");
                 }
 
-                Map<String, Object> tokenData = JsonSerialization.readValue(json, Map.class);
+                Map<String, Object> tokenData = OBJECT_MAPPER.readValue(json, HashMap.class);
                 String accessToken = (String) tokenData.get("access_token");
                 Number expiresIn = (Number) tokenData.getOrDefault("expires_in", 3600);
 
@@ -247,12 +212,5 @@ public final class SmsService {
     }
 
     private record TokenCacheEntry(String accessToken, long expiresAtMillis) {
-    }
-
-    @Data
-    @RequiredArgsConstructor
-    public static final class CountryPhoneCode {
-        private final String label;
-        private final String code;
     }
 }

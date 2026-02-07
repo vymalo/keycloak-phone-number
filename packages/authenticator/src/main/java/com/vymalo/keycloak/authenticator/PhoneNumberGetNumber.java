@@ -1,8 +1,8 @@
 package com.vymalo.keycloak.authenticator;
 
 import com.vymalo.keycloak.constants.PhoneKey;
+import com.vymalo.keycloak.services.PhoneCountryService;
 import com.vymalo.keycloak.services.PhoneNumberService;
-import com.vymalo.keycloak.services.SmsService;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import lombok.NoArgsConstructor;
@@ -36,7 +36,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
             context.setUser(existingUser);
             Response challenge = context.form()
                     .setAttribute("phoneNumber", phoneNumber)
-                    .setAttribute("countries", SmsService.getAllCountries(allowedCountryPattern(context)))
+                    .setAttribute("countries", PhoneCountryService.getAllCountries(allowedCountryPattern(context)))
                     .createForm("request-user-phone-number.ftl");
             context.challenge(challenge);
             return true;
@@ -60,7 +60,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
 
         final var challenge = context.form()
                 .setAttribute("regionPrefix", "")
-                .setAttribute("countries", SmsService.getAllCountries(allowedCountryPattern(context)))
+                .setAttribute("countries", PhoneCountryService.getAllCountries(allowedCountryPattern(context)))
                 .createForm("request-user-phone-number.ftl");
         context.challenge(challenge);
     }
@@ -86,7 +86,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
             Response challenge = context.form()
                     .setError("missing_phone_number_or_region")
                     .setAttribute("regionPrefix", regionPrefix)
-                    .setAttribute("countries", SmsService.getAllCountries(allowedCountryPattern(context)))
+                    .setAttribute("countries", PhoneCountryService.getAllCountries(allowedCountryPattern(context)))
                     .createForm("request-user-phone-number.ftl");
             context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, challenge);
             return;
@@ -111,7 +111,7 @@ public class PhoneNumberGetNumber extends AbstractPhoneNumberAuthenticator {
                     .setError("wrong_phone_number_or_region")
                     .setAttribute("phoneNumber", phoneNumberWithoutPrefix)
                     .setAttribute("regionPrefix", regionPrefix)
-                    .setAttribute("countries", SmsService.getAllCountries(allowedCountryPattern(context)))
+                    .setAttribute("countries", PhoneCountryService.getAllCountries(allowedCountryPattern(context)))
                     .createForm("request-user-phone-number.ftl");
             context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS, challenge);
             return;
