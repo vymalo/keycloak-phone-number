@@ -18,7 +18,7 @@ jobs:
       - name: Build jar
         run: mvn clean package
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: target-keycloak-phonenumber-login
           path: target/keycloak-phonenumber-login-*.jar
@@ -30,13 +30,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: target-keycloak-phonenumber-login
 
       # Upload as an artifact of the current workflow
       - name: Upload build zip artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Release artifacts
           path: '*.jar'

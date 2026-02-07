@@ -11,9 +11,9 @@
     <properties>
         <java.version>17</java.version>
         <lombock.version>1.18.42</lombock.version>
-        <keycloak.version>26.4.2</keycloak.version>
+        <keycloak.version>26.4.7</keycloak.version>
         <googlecode.geocoder.version>3.20</googlecode.geocoder.version>
-        <googlecode.libphonenumber.version>9.0.17</googlecode.libphonenumber.version>
+        <googlecode.libphonenumber.version>9.0.20</googlecode.libphonenumber.version>
         <openapi-generator.version>7.17.0</openapi-generator.version>
         <vym-next-client.api>com.vymalo.api.server</vym-next-client.api>
     </properties>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.19.0</version>
+            <version>3.20.0</version>
         </dependency>
 
         <!-- ::Start Keycloak:: -->
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.20.0</version>
+            <version>2.20.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
