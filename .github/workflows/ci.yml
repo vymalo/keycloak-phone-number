@@ -20,5 +20,6 @@ jobs:
         with:
           java-version: 21
           maven-version: 3.9.9
+          checkout-enabled: false
       - name: Build jar
         run: mvn clean package
