@@ -19,5 +19,15 @@
             <artifactId>keycloak-phonenumber-abstractions</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sns</artifactId>
+            <version>2.25.67</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+            <version>2.25.67</version>
+        </dependency>
     </dependencies>
 </project>

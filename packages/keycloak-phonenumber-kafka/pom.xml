@@ -19,5 +19,10 @@
             <artifactId>keycloak-phonenumber-abstractions</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>3.7.0</version>
+        </dependency>
     </dependencies>
 </project>
