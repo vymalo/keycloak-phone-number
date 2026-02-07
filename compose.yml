@@ -1,6 +1,6 @@
 x-keycloak-common-env: &keycloak-common-env
-  KEYCLOAK_ADMIN: admin
-  KEYCLOAK_ADMIN_PASSWORD: password
+  KC_BOOTSTRAP_ADMIN_USERNAME: admin
+  KC_BOOTSTRAP_ADMIN_PASSWORD: password
   KC_LOG_CONSOLE_COLOR: "true"
   SMS_API_URL: http://prism:4010
   SMS_API_COUNTRY_PATTERN: "cm|de|fr"
@@ -30,10 +30,10 @@ x-keycloak-common-extra: &keycloak-common-extra
     - ./packages/authenticator/target/:/tmp/libs-authenticator:ro
     - ./packages/console/target/:/tmp/libs-console:ro
     - ./packages/api/target/:/tmp/libs-api:ro
-    #- ./packages/sns-sqs/target/:/tmp/libs-sns-sqs:ro
-    #- ./packages/rabbitmq/target/:/tmp/libs-rabbitmq:ro
-    #- ./packages/amqp/target/:/tmp/libs-amqp:ro
-    #- ./packages/kafka/target/:/tmp/libs-kafka:ro
+    - ./packages/sns-sqs/target/:/tmp/libs-sns-sqs:ro
+    - ./packages/rabbitmq/target/:/tmp/libs-rabbitmq:ro
+    - ./packages/amqp/target/:/tmp/libs-amqp:ro
+    - ./packages/kafka/target/:/tmp/libs-kafka:ro
     - ./packages/theme/target/:/tmp/libs-theme:ro
   links:
     - prism
@@ -89,7 +89,7 @@ services:
   keycloak-26:
     image: quay.io/keycloak/keycloak:26.5.2
     ports:
-      - "9026:9026"
+      - "127.0.0.1:9026:9026"
     depends_on:
       token-mock:
         condition: service_healthy
