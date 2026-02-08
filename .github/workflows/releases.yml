@@ -44,6 +44,8 @@ jobs:
         with:
           java-version: 21
           maven-version: 3.9.9
+          checkout-enabled: 'false'
+
       - name: Download Build Artifacts
         uses: actions/download-artifact@v7
         with:
