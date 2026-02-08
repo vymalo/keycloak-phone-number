@@ -8,6 +8,7 @@
         <groupId>com.vymalo.keycloak</groupId>
         <artifactId>keycloak-phone-number</artifactId>
         <version>26.5.2</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>keycloak-phonenumber-abstractions</artifactId>
