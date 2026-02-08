@@ -24,14 +24,7 @@ jobs:
         with:
           name: keycloak-phone-number-jars
           path: |
-            packages/abstractions/target/keycloak-phonenumber-abstractions-*.jar
-            packages/api/target/keycloak-phonenumber-api-*.jar
-            packages/sns-sqs/target/keycloak-phonenumber-sns-sqs-*.jar
-            packages/rabbitmq/target/keycloak-phonenumber-rabbitmq-*.jar
-            packages/amqp/target/keycloak-phonenumber-amqp-*.jar
-            packages/kafka/target/keycloak-phonenumber-kafka-*.jar
-            packages/authenticator/target/keycloak-phonenumber-login-*.jar
-            packages/theme/target/keycloak-phonenumber-theme-*.jar
+            packages/*/target/keycloak-phonenumber-*.jar
 
   release:
     needs: build
