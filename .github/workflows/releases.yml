@@ -45,14 +45,6 @@ jobs:
           name: keycloak-phone-number-jars
           path: dist
 
-      # Upload as an artifact of the current workflow
-      - name: Upload build zip artifact
-        uses: actions/upload-artifact@v6
-        if: 'true'
-        with:
-          name: Release artifacts
-          path: dist/*.jar
-
       # Make official GitHub release which will trigger
       # sending the mail with link for access
       - name: Get version
