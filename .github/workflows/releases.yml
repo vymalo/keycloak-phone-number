@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        name: Checkout
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.19.0
         with:
           java-version: 21
           maven-version: 3.9.12
+          checkout-enabled: 'false'
       - name: Build jar
         run: mvn clean package
       - name: Archive Artifacts
