@@ -7,6 +7,8 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.events.Errors;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.UserProvider;
+import jakarta.ws.rs.core.Response;
+import org.keycloak.authentication.AuthenticationFlowError;
 
 import java.util.Collections;
 
@@ -51,6 +53,18 @@ public class PhoneNumberChooseUser extends AbstractPhoneNumberAuthenticator {
 
             if (!users.isEmpty()) {
                 user = users.get(0);
+            } else {
+                // Пользователь не найден - запрещаем регистрацию
+                log.infof("User not found for phone number: %s, registration is disabled", phoneNumber);
+                event.detail("phone_number", phoneNumber)
+                    .error(Errors.USER_NOT_FOUND);
+                context.getAuthenticationSession().setAuthNote(PhoneKey.ATTEMPTED_PHONE_NUMBER, phoneNumber);
+                context.failureChallenge(
+                    AuthenticationFlowError.INVALID_USER,
+                    context.form().setError("Пользователь с таким номером телефона не найден.")
+                        .createErrorPage(Response.Status.UNAUTHORIZED)
+                );
+                return;
             }
         }
 
