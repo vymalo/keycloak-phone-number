@@ -20,7 +20,7 @@ jobs:
       - name: Build jar
         run: mvn clean package
       - name: Archive Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: keycloak-phone-number-jars
           path: |
