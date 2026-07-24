@@ -40,7 +40,7 @@ jobs:
           checkout-enabled: 'false'
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: keycloak-phone-number-jars
           path: dist
