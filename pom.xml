@@ -26,6 +26,8 @@
         <module>packages/keycloak-phonenumber-rabbitmq</module>
         <module>packages/keycloak-phonenumber-amqp</module>
         <module>packages/keycloak-phonenumber-kafka</module>
+        <module>packages/keycloak-phonenumber-logger</module>
+        <module>packages/keycloak-phonenumber-msg91</module>
         <module>packages/keycloak-phonenumber-login</module>
         <module>packages/keycloak-phonenumber-theme</module>
     </modules>
