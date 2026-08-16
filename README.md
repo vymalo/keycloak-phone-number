@@ -42,8 +42,9 @@ All declared providers are now implemented:
 - `RABBITMQ`
 - `KAFKA`
 - `SNS_SQS`
+- `LOGGER`
 
-`API` is the REST provider. `AMQP`, `RABBITMQ`, `KAFKA`, and `SNS_SQS` now each have their own `SmsGateway` implementation in their respective packages.
+`API` is the REST provider. `AMQP`, `RABBITMQ`, `KAFKA`, `SNS_SQS`, and `LOGGER` now each have their own `SmsGateway` implementation in their respective packages.
 For non-`API` providers, the plugin generates a TAN + hash, publishes a `SEND_SMS` event payload to the configured transport, and validates the submitted TAN locally (hash-bound, one-time, 5-minute TTL).
 
 `SMS_API_URL` is interpreted per provider:
@@ -52,6 +53,7 @@ For non-`API` providers, the plugin generates a TAN + hash, publishes a `SEND_SM
 - `RABBITMQ`: RabbitMQ AMQP URI (example: `amqp://guest:guest@localhost:5672/%2f`)
 - `AMQP`: AMQP URI
 - `SNS_SQS`: optional AWS endpoint override (useful for LocalStack)
+- `LOGGER`: Not needed, provide a dummy value to pass validation
 
 ## 2. How to Use It
 
@@ -68,6 +70,7 @@ curl -L -o keycloak-phonenumber-amqp.jar https://github.com/vymalo/keycloak-phon
 curl -L -o keycloak-phonenumber-rabbitmq.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-rabbitmq-<version>.jar
 curl -L -o keycloak-phonenumber-kafka.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-kafka-<version>.jar
 curl -L -o keycloak-phonenumber-sns-sqs.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-sns-sqs-<version>.jar
+curl -L -o keycloak-phonenumber-logger.jar https://github.com/vymalo/keycloak-phone-number/releases/download/v<version>/keycloak-phonenumber-logger-<version>.jar
 ```
 
 ### Mounting into Keycloak
@@ -96,7 +99,7 @@ docker run -d \
   quay.io/keycloak/keycloak:26.5.2 start-dev
 ```
 
-Mount the gateway jar that matches your configured `smsProvider` (`API`, `AMQP`, `RABBITMQ`, `KAFKA`, `SNS_SQS`).
+Mount the gateway jar that matches your configured `smsProvider` (`API`, `AMQP`, `RABBITMQ`, `KAFKA`, `SNS_SQS`, `LOGGER`).
 
 #### Kubernetes Example
 
@@ -206,6 +209,7 @@ The plugin is built as a monorepo under `packages/`:
 - **`packages/keycloak-phonenumber-rabbitmq`**: RabbitMQ provider implementation.
 - **`packages/keycloak-phonenumber-amqp`**: AMQP provider implementation.
 - **`packages/keycloak-phonenumber-kafka`**: Kafka provider implementation.
+- **`packages/keycloak-phonenumber-logger`**: Logger implementation for local testing
 - **`packages/keycloak-phonenumber-theme`**: login theme package.
 
 Dependency injection (via CDI) is used to wire components together, making the system more modular, testable, and
